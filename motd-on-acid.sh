@@ -260,11 +260,12 @@ print_processor() {
     processor_model=$(echo "$processor_model" | sed "s/ @/,/")
     processor_model=$(echo "$processor_model" | sed "s/ CPU//")
     processor_model=$(echo "$processor_model" | sed "s/  / /")
+    processor_model=$(echo "$processor_model" | sed "s/^ //g")
 
     processor_cores=$(( processor_cores * processor_count ))
 
     if [ "$processor_count" -gt 1 ]; then
-        processor_count="$processor_count""x"
+        processor_count="$processor_count""x "
     else
         processor_count=""
     fi

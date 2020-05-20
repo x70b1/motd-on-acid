@@ -466,14 +466,14 @@ print_login() {
     if [ "$( echo "$login_last" | awk '{ print $1 }')" = "$(whoami)" ]; then
         login_ip=$(echo "$login_last" | awk '{ print $7 }')
 
-        login_login=$(date -d "$(echo "$login_last" | awk '{ print $3 }')" "+%a, %d.%m.%y %H:%M")
+        login_login=$(date -d "$(echo "$login_last" | awk '{ print $3 }' | cut -d '+' -f 1 | sed "s/T/ /")" "+%a, %d.%m.%y %H:%M")
 
         login_space=$(generate_space "$login_login" 25)
 
         if [ "$(echo "$login_last" | awk '{ print $4 }')" = "still" ]; then
             login_logout="still connected"
         else
-            login_logout=$(date -d "$(echo "$login_last" | awk '{ print $5 }')" "+%a, %d.%m.%y %H:%M")
+            login_logout=$(date -d "$(echo "$login_last" | awk '{ print $5 }' | cut -d '+' -f 1 | sed "s/T/ /")" "+%a, %d.%m.%y %H:%M")
         fi
 
         printf "\\n"

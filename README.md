@@ -142,6 +142,13 @@ Webserver;nginx
 
 Prints the status of your local `docker` containers.
 
+You have to add `curl` to the `/etc/sudoers` for your user:
+
+```ini
+username ALL=(ALL) NOPASSWD: /usr/bin/curl -sf --unix-socket /var/run/docker.sock http\:/v1.40/info
+username ALL=(ALL) NOPASSWD: /usr/bin/curl -sf --unix-socket /var/run/docker.sock http\:/v1.40/containers/json?all=true
+```
+
 
 ### --updates
 
@@ -153,6 +160,13 @@ Prints your available linux distribution updates.
 
 Prints the expiration status of all your certs.
 Don't forget to set the path to your cert.
+
+You have to add `find` and `openssl` to the `/etc/sudoers` for your user:
+
+```ini
+username ALL=(ALL) NOPASSWD: /usr/bin/find </your/path/to/ssl> -name cert.pem
+username ALL=(ALL) NOPASSWD: /usr/bin/openssl
+```
 
 
 ### --login

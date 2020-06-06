@@ -439,7 +439,7 @@ print_letsencrypt() {
         printf "\\n"
         printf "    \\033[1;37mSSL / let’s encrypt:\\033[0m\\n"
 
-        cert_list=$(sudo find /srv/docker-share/ssl -name cert.pem)
+        cert_list=$(sudo find $LETSENCRYPT_CERTPATH -name cert.pem)
 
         for cert_file in $cert_list; do
             sudo openssl x509 -checkend $((25 * 86400)) -noout -in "$cert_file" >> /dev/null

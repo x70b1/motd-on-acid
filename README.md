@@ -124,8 +124,8 @@ Prints a usage bar for all mounted filesystems.
 ### --services
 
 Prints the status of a defined list of systemd services.
-The default file is `.bashrc_motd_services.txt`.
 
+The default file is `.bashrc_motd_services.txt`.
 It should look like the example. The separator is`;`.
 
 1. The printed name [required]

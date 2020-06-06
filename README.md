@@ -18,6 +18,9 @@ I warned you.
 
 ![motd-on-acid](preview.png)
 
+The most of the icons in this preview are from Font Awesome 5 Pro.
+I also used [fontello](http://fontello.com/) to create some own icons.
+
 
 ## Setup
 

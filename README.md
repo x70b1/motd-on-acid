@@ -14,6 +14,10 @@ It makes it annoying when you log in.
 So be careful.
 I warned you.
 
+## Preview
+
+![motd-on-acid](preview.png)
+
 
 ## Setup
 

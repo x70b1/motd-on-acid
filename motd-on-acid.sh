@@ -191,7 +191,7 @@ generate_bar_disk() {
 }
 
 print_banner() {
-    printf "\\n%s\\n" "$(figlet -f $BANNER_FONTPATH " $BANNER_TEXT")"
+    printf "\\n%s\\n" "$(figlet -f "$BANNER_FONTPATH" " $BANNER_TEXT")"
 
     if [ -f /etc/os-release ]; then
         . /etc/os-release

@@ -14,6 +14,8 @@ BANNER_UPTIME_ICON="#"
 BANNER_UPTIME_COLOR="94"
 BANNER_DEBIAN_ICON="#"
 BANNER_DEBIAN_COLOR="95"
+BANNER_FEDORA_ICON="#"
+BANNER_FEDORA_COLOR="34"
 BANNER_FONTPATH=""
 BANNER_TEXT="$(hostname -s)"
 
@@ -201,6 +203,11 @@ print_banner() {
             banner_distro_color=$BANNER_DEBIAN_COLOR
             banner_distro_name="Debian"
             banner_distro_version=$(cat /etc/debian_version)
+        elif [ "$ID" = "fedora" ]; then
+            banner_distro_icon=$BANNER_FEDORA_ICON
+            banner_distro_color=$BANNER_FEDORA_COLOR
+            banner_distro_name="Fedora"
+            banner_distro_version=$VERSION_ID
         else
             banner_distro_icon="?"
             banner_distro_color="0"

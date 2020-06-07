@@ -440,6 +440,31 @@ print_updates() {
         fi
 
         printf "       \\033[%sm%s\\033[0m   %s\\n" "$updates_color" "$updates_icon" "$updates_message"
+    elif [ -f /usr/bin/dnf ]; then
+        printf "\\n"
+        printf "    \\033[1;37mUpdates:\\033[0m\\n"
+
+        updates_count=$(dnf updateinfo -C -q --list)
+        updates_count_regular=$(echo "$updates_count" | wc -l)
+        updates_count_security=$(echo "$updates_count" | grep -c "Important/Sec")
+
+        if [ -n "$updates_count_regular" ] && [ "$updates_count_regular" -ne 0 ]; then
+            if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
+                updates_icon=$UPDATES_SECURITY_ICON
+                updates_color=$UPDATES_SECURITY_COLOR
+                updates_message="$updates_count_regular packages can be updated, $updates_count_security are security updates."
+            else
+                updates_icon=$UPDATES_AVAILIABLE_ICON
+                updates_color=$UPDATES_AVAILIABLE_COLOR
+                updates_message="$updates_count_regular packages can be updated."
+            fi
+        else
+            updates_icon=$UPDATES_ZERO_ICON
+            updates_color=$UPDATES_ZERO_COLOR
+            updates_message="Everything is up to date!"
+        fi
+
+        printf "       \\033[%sm%s\\033[0m   %s\\n" "$updates_color" "$updates_icon" "$updates_message"
     fi
 }
 

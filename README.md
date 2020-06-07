@@ -4,7 +4,7 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/x70b1/motd-on-acid.svg)](https://github.com/x70b1/motd-on-acid/graphs/contributors)
 [![license](https://img.shields.io/github/license/x70b1/motd-on-acid.svg)](https://github.com/x70b1/motd-on-acid/blob/master/LICENSE)
 
-This MOTD has so many colours! This thing is from hell.
+This MOTD has so many colors! This thing is from hell.
 It is both a curse and a blessing.
 
 It's colourful. It shows a lot. It's fun.
@@ -13,6 +13,7 @@ The execution is sometimes too slow.
 It makes it annoying when you log in.
 So be careful.
 I warned you.
+
 
 ## Preview
 

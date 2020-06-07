@@ -360,6 +360,8 @@ print_services() {
                 if [ -n "$service_package" ]; then
                     if [ -f /usr/bin/apt ]; then
                         package_version=$(dpkg -s "$service_package" | grep '^Version:' | cut -d ' ' -f 2 | cut -d ':' -f 2 | cut -d '-' -f 1)
+                    elif [ -f /usr/bin/rpm ]; then
+                        package_version=$(rpm -q --queryformat '%{VERSION}' "$service_package")
                     else
                         package_version="?"
                     fi

@@ -106,7 +106,7 @@ Disable or remove all `pam_motd.so` PAM includes in `/etc/pam.d/sshd`
 
 ### --banner
 
-Prints a `figlet` banner, distribution, kernel version and uptime.
+Prints a `figlet` banner, linux distribution, kernel version and uptime.
 
 
 ### --processor
@@ -138,7 +138,7 @@ It should look like the example. The separator is`;`.
 
 1. The printed name [required]
 2. `systemd` service name [required]
-3. `dpkg` package name for version info [not required, will print `--` if empty]
+3. `dpkg` or `rpm` package name for version info [not required, will print `--` if empty]
 
 ```
 OpenSSH;ssh;openssh-server
@@ -161,7 +161,7 @@ username ALL=(ALL) NOPASSWD: /usr/bin/curl -sf --unix-socket /var/run/docker.soc
 ### --updates
 
 Prints your available linux distribution updates.
-`apt` is supported at the moment.
+`apt` and `dnf` is supported at the moment.
 
 
 ### --letsencrypt

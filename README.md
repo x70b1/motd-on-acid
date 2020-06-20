@@ -180,3 +180,8 @@ username ALL=(ALL) NOPASSWD: /usr/bin/openssl
 ### --login
 
 Prints the previous login time, logout time and IP of your current user.
+
+
+### --include
+
+Create your own script and print it on your MOTD!

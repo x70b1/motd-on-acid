@@ -1,5 +1,5 @@
 #!/bin/sh
-# shellcheck disable=SC1091
+# shellcheck disable=SC1090,SC1091
 
 BAR_ELEMENT="-"
 BAR_HEALTHY_COLOR="32"
@@ -64,6 +64,8 @@ LETSENCRYPT_CERTPATH="/etc/letsencrypt/live"
 LOGIN_LOGIN_ICON="#"
 LOGIN_LOGOUT_ICON="#"
 LOGIN_IP_ICON="#"
+
+INCLUDE_FILE="ownscript.sh"
 
 generate_unit_byte() {
     # 1 - unit in M
@@ -520,6 +522,10 @@ print_login() {
     fi
 }
 
+print_include() {
+    . $INCLUDE_FILE
+}
+
 bash_motd() {
     for module in "$@"; do
         if [ "$module" = "--banner" ]; then
@@ -542,6 +548,8 @@ bash_motd() {
             print_letsencrypt
         elif [ "$module" = "--login" ]; then
             print_login
+        elif [ "$module" = "--include" ]; then
+            print_include
         fi
     done
 

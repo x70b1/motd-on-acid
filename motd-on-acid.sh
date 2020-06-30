@@ -302,7 +302,7 @@ print_swap() {
     swap_total=$(echo "$swap_usage" | awk '{ print $2 }')
     swap_used=$(echo "$swap_usage" | awk '{ print $3 }')
 
-    if [ "$swap_total" -ne 0 ] && [ "$swap_used" -ne 0 ]; then
+    if [ "$swap_total" -ne 0 ]; then
         printf "\\n"
         printf "    \\033[1;37mSwap:\\033[0m\\n"
 

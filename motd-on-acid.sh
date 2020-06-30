@@ -399,7 +399,7 @@ print_docker() {
 
         printf "       %s   Version %s%s%s  %s Images\\n\\n" "$DOCKER_VERSION_ICON" "$docker_version" "$docker_space" "$DOCKER_IMAGES_ICON" "$docker_images"
 
-        docker_list=$(sudo curl -sf --unix-socket /var/run/docker.sock http:/v1.40/containers/json?all=true | jq -c ' .[]')
+        docker_list=$(sudo curl -sf --unix-socket /var/run/docker.sock "http://v1.40/containers/json?all=true" | jq -c ' .[]')
 
         echo "$docker_list" | while read -r line; do
             container_name="$(echo "$line" | jq -r '.Names[]' | sed 's/\///')"

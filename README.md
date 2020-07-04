@@ -146,6 +146,13 @@ Webserver;nginx
 ```
 
 
+### --podman
+
+Prints the status of your local `podman` containers.
+
+You have to add `curl` to the `/etc/sudoers` for your user:
+
+
 ### --docker
 
 Prints the status of your local `docker` containers.

@@ -39,6 +39,13 @@ SERVICES_DOWN_ICON="#"
 SERVICES_DOWN_COLOR="31"
 SERVICES_FILE=".bashrc_motd_services.txt"
 
+PODMAN_VERSION_ICON="#"
+PODMAN_IMAGES_ICON="#"
+PODMAN_RUNNING_ICON="#"
+PODMAN_RUNNING_COLOR="32"
+PODMAN_OTHER_ICON="#"
+PODMAN_OTHER_COLOR="90"
+
 DOCKER_VERSION_ICON="#"
 DOCKER_IMAGES_ICON="#"
 DOCKER_RUNNING_ICON="#"
@@ -384,6 +391,46 @@ print_services() {
     fi
 }
 
+print_podman() {
+    printf "\\n"
+    printf "    \\033[1;37mPodman:\\033[0m\\n"
+
+    podman_version=$(podman version --format json | jq -r '.Server.Version')
+    podman_space=$(generate_space "$podman_version" 23)
+    podman_images=$(podman images --format json | jq '. | length')
+
+    printf "       %s   Version %s%s%s  %s Images\\n\\n" "$PODMAN_VERSION_ICON" "$podman_version" "$podman_space" "$PODMAN_IMAGES_ICON" "$podman_images"
+
+    podman_list=$(sudo podman pod ls --sort name --format json)
+    podman_pods=$(echo "$podman_list" | jq -r '.[] .name')
+
+    echo "$podman_pods" | while read -r pod; do
+        if [ "$(echo "$podman_list" | jq -r ".[] | select(.name == \"$pod\") | .status")" = "Running" ]; then
+            pod_space=$(generate_space "$pod" 34)
+
+            pod_container_running="$(echo "$podman_list" | jq -r ".[] | select(.name == \"$pod\") | .containerInfo[] | select(.status == \"Running\") | .status" | wc -l)"
+
+            if [ "$pod_container_running" -ne 0 ]; then
+                pod_container_running=$(printf "\\033[%um%u Running\\033[0m" "$PODMAN_RUNNING_COLOR" "$pod_container_running")
+            fi
+
+            pod_container_other="$(echo "$podman_list" | jq -r ".[] | select(.name == \"$pod\") | .containerInfo[] | select(.status != \"Running\") | .status" | wc -l)"
+
+            if [ "$pod_container_other" -ne 1 ]; then
+                pod_container_other=$(printf ",  \\033[%um%u Other\\033[0m" "$PODMAN_OTHER_COLOR" "$pod_container_other")
+            else
+                pod_container_other=""
+            fi
+
+            pod_status="$pod_container_running$pod_container_other"
+
+            printf "       \\033[%um%s\\033[0m   %s%s%s\\n" "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_space" "$pod_status"
+        else
+            printf "       \\033[%um%s\\033[0m   \\033[%um%s\\033[0m\\n" "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
+        fi
+    done
+}
+
 print_docker() {
     if [ "$(systemctl is-active docker.service)" = "active" ]; then
         printf "\\n"
@@ -540,6 +587,8 @@ bash_motd() {
             print_diskspace
         elif [ "$module" = "--services" ]; then
             print_services
+        elif [ "$module" = "--podman" ]; then
+            print_podman
         elif [ "$module" = "--docker" ]; then
             print_docker
         elif [ "$module" = "--updates" ]; then

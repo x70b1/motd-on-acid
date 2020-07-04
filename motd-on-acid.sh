@@ -416,7 +416,7 @@ print_podman() {
 
             pod_container_other="$(echo "$podman_list" | jq -r ".[] | select(.name == \"$pod\") | .containerInfo[] | select(.status != \"Running\") | .status" | wc -l)"
 
-            if [ "$pod_container_other" -ne 1 ]; then
+            if [ "$pod_container_other" -ne 0 ]; then
                 pod_container_other=$(printf ",  \\033[%um%u Other\\033[0m" "$PODMAN_OTHER_COLOR" "$pod_container_other")
             else
                 pod_container_other=""

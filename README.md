@@ -150,6 +150,14 @@ Webserver;nginx
 
 Prints the status of your local `podman` containers.
 
+You have to add `podman` to the `/etc/sudoers` for your user:
+
+```ini
+username ALL=(ALL) NOPASSWD: /usr/bin/podman version --format json
+username ALL=(ALL) NOPASSWD: /usr/bin/podman images --format json
+username ALL=(ALL) NOPASSWD: /usr/bin/podman pod ls --sort name --format json
+```
+
 
 ### --docker
 

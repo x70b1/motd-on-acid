@@ -395,26 +395,26 @@ print_podman() {
     printf "\\n"
     printf "    \\033[1;37mPodman:\\033[0m\\n"
 
-    podman_version=$(sudo podman version --format json | jq -r '.Server.Version')
+    podman_version=$(sudo podman version --format json | jq -r '.Client.Version')
     podman_space=$(generate_space "$podman_version" 23)
     podman_images=$(sudo podman images --format json | jq '. | length')
 
     printf "       %s   Version %s%s%s  %s Images\\n\\n" "$PODMAN_VERSION_ICON" "$podman_version" "$podman_space" "$PODMAN_IMAGES_ICON" "$podman_images"
 
     podman_list=$(sudo podman pod ls --sort name --format json)
-    podman_pods=$(echo "$podman_list" | jq -r '.[] .name')
+    podman_pods=$(echo "$podman_list" | jq -r '.[] .Name')
 
     echo "$podman_pods" | while read -r pod; do
-        if [ "$(echo "$podman_list" | jq -r ".[] | select(.name == \"$pod\") | .status")" = "Running" ]; then
+        if [ "$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Status")" = "Running" ]; then
             pod_space=$(generate_space "$pod" 34)
 
-            pod_container_running="$(echo "$podman_list" | jq -r ".[] | select(.name == \"$pod\") | .containerInfo[] | select(.status == \"Running\") | .status" | wc -l)"
+            pod_container_running="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status == \"running\") | .Status" | wc -l)"
 
             if [ "$pod_container_running" -ne 0 ]; then
                 pod_container_running=$(printf "\\033[%um%u Running\\033[0m" "$PODMAN_RUNNING_COLOR" "$pod_container_running")
             fi
 
-            pod_container_other="$(echo "$podman_list" | jq -r ".[] | select(.name == \"$pod\") | .containerInfo[] | select(.status != \"Running\") | .status" | wc -l)"
+            pod_container_other="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status != \"running\") | .Status" | wc -l)"
 
             if [ "$pod_container_other" -ne 0 ]; then
                 pod_container_other=$(printf ",  \\033[%um%u Other\\033[0m" "$PODMAN_OTHER_COLOR" "$pod_container_other")

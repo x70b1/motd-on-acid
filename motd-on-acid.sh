@@ -79,7 +79,7 @@ generate_unit_byte() {
 
     if [ "$1" -ge 1024 ]; then
         unit_symbol="G"
-        unit_value=$(echo "scale=1; $1/1024" | bc -l)
+        unit_value=$(echo "$1/1024" | bc -l | LANG=C xargs printf "%.1f\n")
     else
         unit_symbol="M"
         unit_value=$1

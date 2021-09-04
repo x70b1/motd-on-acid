@@ -329,8 +329,8 @@ print_diskspace() {
         diskspace_disk_name="$(echo "$line" | jq -r '.name')"
         diskspace_disk_mount="$(echo "$line" | jq -r '.mountpoint')"
 
-        diskspace_disk_size="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name" | awk '{ print $2 }')"
-        diskspace_disk_used="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name" | awk '{ print $3 }')"
+        diskspace_disk_size="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name " | awk '{ print $2 }')"
+        diskspace_disk_used="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name " | awk '{ print $3 }')"
 
         if [ -z "$diskspace_disk_size" ]; then
             diskspace_disk_size="$(echo "$diskspace_partitions" | grep "$diskspace_disk_mount" | awk '{ print $2 }')"

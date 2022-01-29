@@ -469,10 +469,10 @@ print_updates() {
         printf "\\n"
         printf "    \\033[1;37mUpdates:\\033[0m\\n"
 
-        updates_count_regular=$(apt-get upgrade -s | grep -c ^Inst)
-        updates_count_security=$(apt-get upgrade -s | grep ^Inst | grep -c Security)
+        updates_count_regular=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
+        updates_count_security=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
 
-        if [ -n "$updates_count_regular" ] && [ "$updates_count_regular" -ne 0 ]; then
+        if [ "$updates_count_regular" -ne 0 ]; then
             if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
                 updates_icon=$UPDATES_SECURITY_ICON
                 updates_color=$UPDATES_SECURITY_COLOR

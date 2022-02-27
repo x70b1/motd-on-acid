@@ -5,7 +5,6 @@
 [![license](https://img.shields.io/github/license/x70b1/motd-on-acid.svg)](https://github.com/x70b1/motd-on-acid/blob/master/LICENSE)
 
 This MOTD has so many colors! This thing is from hell.
-It is both a curse and a blessing.
 
 It's colourful. It shows a lot. It's fun.
 But I guess we have reached the limit.
@@ -26,19 +25,19 @@ I also used [fontello](http://fontello.com/) to create some own icons.
 ## Setup
 
 1. Check the dependencies.
-Some modules require `jq`, the banner needs `figlet`.
-Install them.
+   Some modules require `jq`, the banner needs `figlet`.
+   Install them.
 
 2. Copy `motd-on-acid.sh` to `~/.bashrc_motd` on your system.
 
 3. Run `motd-on-acid` at the end of your `.bashrc`.
-Add the modules as arguments.
-The output is ordered in the same way.
+  Add the modules as arguments.
+  The output is ordered in the same way.
 
 4. Replace the predefined values with your own.
-The complete list of vars is [at the top](motd-on-acid.sh#L4) of the script.
+   The complete list of vars is [at the top](motd-on-acid.sh#L4) of the script.
 
-```
+```sh
 # example snippet for your .bashrc:
 
 source ~/.bashrc_motd
@@ -61,7 +60,7 @@ If you use the example above you will get some problems.
 
 The result would look like this:
 
-```
+```sh
 # example snippet for your .bashrc:
 
 if [ -n "$SSH_CONNECTION" ] && [ $SHLVL -eq 1 ] && [[ $- == *i* ]]; then
@@ -152,7 +151,7 @@ Prints the status of your local `podman` containers.
 
 You have to add `podman` to the `/etc/sudoers` for your user:
 
-```ini
+```
 username ALL=(ALL) NOPASSWD: /usr/bin/podman version --format json
 username ALL=(ALL) NOPASSWD: /usr/bin/podman images --format json
 username ALL=(ALL) NOPASSWD: /usr/bin/podman pod ls --sort name --format json
@@ -165,7 +164,7 @@ Prints the status of your local `docker` containers.
 
 You have to add `curl` to the `/etc/sudoers` for your user:
 
-```ini
+```
 username ALL=(ALL) NOPASSWD: /usr/bin/curl -sf --unix-socket /var/run/docker.sock http\:/v1.40/info
 username ALL=(ALL) NOPASSWD: /usr/bin/curl -sf --unix-socket /var/run/docker.sock http\:/v1.40/containers/json?all=true
 ```
@@ -184,7 +183,7 @@ Don't forget to set the path to your cert.
 
 You have to add `find` and `openssl` to the `/etc/sudoers` for your user:
 
-```ini
+```
 username ALL=(ALL) NOPASSWD: /usr/bin/find </your/path/to/ssl> -name cert.pem
 username ALL=(ALL) NOPASSWD: /usr/bin/openssl
 ```

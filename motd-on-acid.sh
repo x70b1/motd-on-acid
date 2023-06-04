@@ -75,7 +75,7 @@ LOGIN_IP_ICON="#"
 INCLUDE_FILE="ownscript.sh"
 
 generate_unit_byte() {
-    # 1 - unit in M
+    # 1 - value in M
 
     if [ "$1" -ge 1024 ]; then
         unit_symbol="G"
@@ -122,7 +122,6 @@ generate_bar() {
     bar_used_size=$(( bar_width * bar_used_percent / 100 ))
     bar_unused_size=$(( bar_width - bar_used_size ))
 
-
     if [ $bar_used_percent -ge "$BAR_WARNING_THRESHOLD" ]; then
         bar_used_color=$BAR_WARNING_COLOR
     elif [ $bar_used_percent -ge "$BAR_CRITICAL_THRESHOLD" ]; then
@@ -130,7 +129,6 @@ generate_bar() {
     else
         bar_used_color=$BAR_HEALTHY_COLOR
     fi
-
 
     printf '       %s   \033[%sm%s\033[0m' "$1" "$bar_used_color" "$(printf "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_used_size))"
 
@@ -155,7 +153,7 @@ generate_bar_memory() {
     bar_memory_cached=$(generate_unit_byte "$4")
     bar_memory_available=$(generate_unit_byte  $(( $2 - $3 )) )
 
-    printf "           %s used / %s cached / %s available\\n" "$bar_memory_used" "$bar_memory_cached" "$bar_memory_available"
+    generate_annotation "" "$bar_memory_used" "$bar_memory_cached" "$bar_memory_available"
     generate_bar "$1" "$2" "$3" "$4"
 }
 
@@ -169,7 +167,7 @@ generate_bar_swap() {
     bar_swap_available=$(( $2 - $3 ))
     bar_swap_available=$(generate_unit_byte "$bar_swap_available")
 
-    printf "           %s used / %s available\\n" "$bar_swap_used" "$bar_swap_available"
+    generate_annotation "" "$bar_swap_used" "" "$bar_swap_available"
     generate_bar "$1" "$2" "$3"
 }
 

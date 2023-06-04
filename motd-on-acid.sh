@@ -448,8 +448,8 @@ print_docker() {
 
 print_updates() {
     if [ -f /usr/bin/apt ]; then
-        printf "\\n"
-        printf "    \\033[1;37mUpdates:\\033[0m\\n"
+        printf '\n'
+        printf '    \033[1;37mUpdates:\033[0m\n'
 
         updates_count_regular=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
         updates_count_security=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
@@ -470,10 +470,10 @@ print_updates() {
             updates_message="Everything is up to date!"
         fi
 
-        printf "       \\033[%sm%s\\033[0m   %s\\n" "$updates_color" "$updates_icon" "$updates_message"
+        printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
     elif [ -f /usr/bin/dnf ]; then
-        printf "\\n"
-        printf "    \\033[1;37mUpdates:\\033[0m\\n"
+        printf '\n'
+        printf '    \033[1;37mUpdates:\033[0m\n'
 
         updates_count=$(dnf updateinfo -C -q --list)
         updates_count_regular=$(echo "$updates_count" | wc -l)
@@ -495,14 +495,14 @@ print_updates() {
             updates_message="Everything is up to date!"
         fi
 
-        printf "       \\033[%sm%s\\033[0m   %s\\n" "$updates_color" "$updates_icon" "$updates_message"
+        printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
     fi
 }
 
 print_letsencrypt() {
     if [ -d $LETSENCRYPT_CERTPATH ] && [ "$(ls -a $LETSENCRYPT_CERTPATH)" ]; then
-        printf "\\n"
-        printf "    \\033[1;37mSSL / let’s encrypt:\\033[0m\\n"
+        printf '\n'
+        printf '    \033[1;37mSSL / let'"’"'s encrypt:\033[0m\n'
 
         cert_list=$(sudo find $LETSENCRYPT_CERTPATH -name cert.pem)
 
@@ -513,15 +513,15 @@ print_letsencrypt() {
             cert_name=$(echo "$cert_file" | rev | cut -d '/' -f 2 | rev)
 
             if [ "$result" -eq 0 ]; then
-                printf "       \\033[%sm%s\\033[0m   %s\\n" "$LETSENCRYPT_VALID_COLOR" "$LETSENCRYPT_VALID_ICON" "$cert_name"
+                printf '       \033[%sm%s\033[0m   %s\n' "$LETSENCRYPT_VALID_COLOR" "$LETSENCRYPT_VALID_ICON" "$cert_name"
             else
                 sudo openssl x509 -checkend $((0 * 86400)) -noout -in "$cert_file" >> /dev/null
                 result=$?
 
                 if [ "$result" -eq 0 ]; then
-                    printf "       \\033[%sm%s\\033[0m   %s\\n" "$LETSENCRYPT_WARNING_COLOR" "$LETSENCRYPT_WARNING_ICON" "$cert_name"
+                    printf '       \033[%sm%s\033[0m   %s\n' "$LETSENCRYPT_WARNING_COLOR" "$LETSENCRYPT_WARNING_ICON" "$cert_name"
                 else
-                    printf "       \\033[%sm%s\\033[0m   %s\\n" "$LETSENCRYPT_INVALID_COLOR" "$LETSENCRYPT_INVALID_ICON" "$cert_name"
+                    printf '       \033[%sm%s\033[0m   %s\n' "$LETSENCRYPT_INVALID_COLOR" "$LETSENCRYPT_INVALID_ICON" "$cert_name"
                 fi
             fi
         done
@@ -533,10 +533,7 @@ print_login() {
 
     if [ "$( echo "$login_last" | awk '{ print $1 }')" = "$(whoami)" ]; then
         login_ip=$(echo "$login_last" | awk '{ print $7 }')
-
         login_login=$(date -d "$(echo "$login_last" | awk '{ print $3 }' | cut -d '+' -f 1 | sed "s/T/ /")" "+%a, %d.%m.%y %H:%M")
-
-        login_space=$(generate_space "$login_login" 25)
 
         if [ "$(echo "$login_last" | awk '{ print $4 }')" = "still" ]; then
             login_logout="still connected"
@@ -544,10 +541,10 @@ print_login() {
             login_logout=$(date -d "$(echo "$login_last" | awk '{ print $5 }' | cut -d '+' -f 1 | sed "s/T/ /")" "+%a, %d.%m.%y %H:%M")
         fi
 
-        printf "\\n"
-        printf "    \\033[1;37mLast login for %s:\\033[0m\\n" "$(echo "$login_last" | awk '{ print $1 }')"
-        printf "       %s   %s%s%s  %s\\n" "$LOGIN_LOGIN_ICON" "$login_login" "$login_space" "$LOGIN_LOGOUT_ICON" "$login_logout"
-        printf "       %s   %s\\n" "$LOGIN_IP_ICON" "$login_ip"
+        printf '\n'
+        printf '    \033[1;37mLast login for %s:\033[0m\n' "$(echo "$login_last" | awk '{ print $1 }')"
+        printf '       %s   %-25s%s  %s\n' "$LOGIN_LOGIN_ICON" "$login_login" "$LOGIN_LOGOUT_ICON" "$login_logout"
+        printf '       %s   %s\n' "$LOGIN_IP_ICON" "$login_ip"
     fi
 }
 
@@ -559,8 +556,8 @@ bash_motd() {
     for module in "$@"; do
         if [ "$module" = "--banner" ]; then
             print_banner
-        elif [ "$module" = "--processor" ]; then
-            print_processor
+        elif [ "$module" = "--cpu" ]; then
+            print_cpu
         elif [ "$module" = "--memory" ]; then
             print_memory
         elif [ "$module" = "--swap" ]; then
@@ -584,5 +581,5 @@ bash_motd() {
         fi
     done
 
-    printf "\\n"
+    printf '\n'
 }

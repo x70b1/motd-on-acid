@@ -214,15 +214,15 @@ print_banner() {
     fi
 }
 
-print_processor() {
+print_cpu() {
     printf "\\n"
-    printf "    \\033[1;37mProcessor:\\033[0m\\n"
+    printf "    \\033[1;37mCPU:\\033[0m\\n"
 
-    processor_loadavg="$(cut -d " " -f 1,2,3 < /proc/loadavg)"
-    if [ "$(echo "$processor_loadavg" | cut -d "." -f 1)" -ge "$PROCESSOR_LOADAVG_CRITICAL_THRESHOLD" ]; then
-        processor_loadavg_color=$PROCESSOR_LOADAVG_CRITICAL_COLOR
-    elif [ "$(echo "$processor_loadavg" | cut -d "." -f 1)" -ge "$PROCESSOR_LOADAVG_WARNING_THRESHOLD" ]; then
-        processor_loadavg_color=$PROCESSOR_LOADAVG_WARNING_COLOR
+    cpu_loadavg="$(cut -d " " -f 1,2,3 < /proc/loadavg)"
+    if [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$CPU_LOADAVG_CRITICAL_THRESHOLD" ]; then
+        cpu_loadavg_color=$CPU_LOADAVG_CRITICAL_COLOR
+    elif [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$CPU_LOADAVG_WARNING_THRESHOLD" ]; then
+        cpu_loadavg_color=$CPU_LOADAVG_WARNING_COLOR
     else
         cpu_loadavg_color=$CPU_LOADAVG_HEALTHY_COLOR
     fi

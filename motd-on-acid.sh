@@ -292,16 +292,16 @@ print_swap() {
     swap_used=$(echo "$swap_usage" | awk '{ print $3 }')
 
     if [ "$swap_total" -ne 0 ]; then
-        printf "\\n"
-        printf "    \\033[1;37mSwap:\\033[0m\\n"
+        printf '\n'
+        printf '    \033[1;37mSwap:\033[0m\n'
 
         generate_bar_swap "$SWAP_ICON" "$swap_total" "$swap_used"
     fi
 }
 
 print_diskspace() {
-    printf "\\n"
-    printf "    \\033[1;37mDiskspace:\\033[0m\\n"
+    printf '\n'
+    printf '    \033[1;37mDiskspace:\033[0m\n'
 
     diskspace_devices=$(lsblk -Jlo NAME,MOUNTPOINT | jq  -c '.blockdevices | sort_by(.mountpoint) | .[] | select( .mountpoint != null and .mountpoint != "[SWAP]" )')
     diskspace_partitions=$(df -B M | sed -e "s/M//g")

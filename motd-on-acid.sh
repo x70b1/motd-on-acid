@@ -85,73 +85,64 @@ generate_unit_byte() {
         unit_value=$1
     fi
 
-    echo "$unit_value$unit_symbol"
+    printf '%s%s\n' "$unit_value" "$unit_symbol"
 }
 
-generate_space() {
-    # 1 - already used
-    # 2 - total
+generate_annotation() {
+    # 1 - name
+    # 2 - used
+    # 3 - cached
+    # 4 - available
 
-    space_fill=$(( $2 - ${#1} ))
-    space_chars=""
+    if [ "$3" = "" ]; then
+        annotation_cached=""
+    else
+        annotation_cached="$3 cached / "
+    fi
 
-    while [ $space_fill -ge 0 ]; do
-        space_chars="$space_chars "
-        space_fill=$(( space_fill - 1 ))
-    done
+    if [ "$1" = "" ]; then
+        annotation_string="$2 used / $annotation_cached$4 available"
 
-    echo "$space_chars"
+        printf '           %49s\n' "$annotation_string"
+    else
+        annotation_string="$2 used / $annotation_cached$4 available"
+
+        printf '           %-20s%29s\n' "$1" "$annotation_string"
+    fi
 }
 
 generate_bar() {
     # 1 - icon
     # 2 - total
-    # 3 - used_1
-    # 4 - [ used_2 ]
+    # 3 - used
+    # 4 - [ noticed ]
 
-    bar_percent=$(( $3 * 100 / $2 ))
-    bar_separator=$(( $3 * 100 * 10 / $2 / 25 ))
+    bar_width=50
+    bar_used_percent=$(( $3 * 100 / $2 ))
+    bar_used_size=$(( bar_width * bar_used_percent / 100 ))
+    bar_unused_size=$(( bar_width - bar_used_size ))
 
-    if [ $bar_percent -ge "$BAR_WARNING_THRESHOLD" ]; then
-        bar_color=$BAR_WARNING_COLOR
-    elif [ $bar_percent -ge "$BAR_CRITICAL_THRESHOLD" ]; then
-        bar_color=$BAR_CRITICAL_COLOR
+
+    if [ $bar_used_percent -ge "$BAR_WARNING_THRESHOLD" ]; then
+        bar_used_color=$BAR_WARNING_COLOR
+    elif [ $bar_used_percent -ge "$BAR_CRITICAL_THRESHOLD" ]; then
+        bar_used_color=$BAR_CRITICAL_COLOR
     else
-        bar_color=$BAR_HEALTHY_COLOR
+        bar_used_color=$BAR_HEALTHY_COLOR
     fi
 
-    printf "       %s   \\033[%dm" "$1" "$bar_color"
 
-    if [ -z "$4" ] ; then
-        bar_piece=0
-        while [ $bar_piece -le 40 ]; do
-            if [ "$bar_piece" -ne "$bar_separator" ]; then
-                printf "%s" "$BAR_ELEMENT"
-            else
-                printf "%s\\033[1;30m" "$BAR_ELEMENT"
-            fi
+    printf '       %s   \033[%sm%s\033[0m' "$1" "$bar_used_color" "$(printf "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_used_size))"
 
-            bar_piece=$(( bar_piece + 1 ))
-        done
-    else
-        bar_cached_val=$(( $3 + $4 ))
-        bar_cached_separator=$(( bar_cached_val * 100 * 10 / $2 / 25 ))
+    if [ -n "$4" ]; then
+        bar_noticed_percent=$(( $4 * 100 / $2 ))
+        bar_noticed_size=$(( bar_width * bar_noticed_percent / 100 ))
+        bar_unused_size=$(( bar_width - bar_used_size - bar_noticed_size ))
 
-        bar_piece=0
-        while [ $bar_piece -le 40 ]; do
-            if [ $bar_piece -eq $bar_separator ]; then
-                printf "%s\\033[1;36m" "$BAR_ELEMENT"
-            elif [ $bar_piece -eq $bar_cached_separator ]; then
-                printf "%s\\033[1;30m" "$BAR_ELEMENT"
-            else
-                printf "%s" "$BAR_ELEMENT"
-            fi
-
-            bar_piece=$(( bar_piece + 1 ))
-        done
+        printf '\033[1;36m%s\033[0m' "$(printf "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_noticed_size))"
     fi
 
-    printf "\\033[0m\\n"
+    printf '\033[1;30m%s\033[0m\n' "$(printf "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_unused_size))"
 }
 
 generate_bar_memory() {
@@ -188,16 +179,11 @@ generate_bar_disk() {
     # 3 - used space in M
     # 4 - mount path
 
-    bar_disk_mount="$4$(generate_space "$4" 10)"
-
     bar_disk_used=$(generate_unit_byte "$3")
-    bar_disk_used="$(generate_space "$bar_disk_used" 5)$bar_disk_used used"
+    bar_disk_available=
+    bar_disk_available="$(generate_unit_byte $(( $2 - $3)))"
 
-    bar_disk_available=$(( $2 - $3 ))
-    bar_disk_available="$(generate_unit_byte "$bar_disk_available") available"
-
-    printf "           %s%s / %s\\n" "$bar_disk_mount" "$bar_disk_used" "$bar_disk_available"
-
+    generate_annotation "$4" "$bar_disk_used" "" "$bar_disk_available"
     generate_bar "$1" "$2" "$3"
 }
 

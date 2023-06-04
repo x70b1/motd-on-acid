@@ -333,9 +333,9 @@ print_diskspace() {
 }
 
 print_services() {
-    if [ -f $SERVICES_FILE ] && [ "$(wc -l < $SERVICES_FILE )" != 0 ]; then
-        printf "\\n"
-        printf "    \\033[1;37mServices:\\033[0m                              \\033[1;37mVersion:\\033[0m\\n"
+    if [ -f "$SERVICES_FILE" ] && [ "$(wc -l < "$SERVICES_FILE" )" != 0 ]; then
+        printf '\n'
+        printf '    \033[1;37mServices:\033[0m                              \033[1;37mVersion:\033[0m\n'
 
         while read -r line; do
             service_description=$(echo "$line" | cut -d ';' -f 1)
@@ -353,8 +353,6 @@ print_services() {
                     service_color=$SERVICES_DOWN_COLOR
                 fi
 
-                service_space=$(generate_space "$service_description" 34)
-
                 if [ -n "$service_package" ]; then
                     if [ -f /usr/bin/apt ]; then
                         package_version=$(dpkg -s "$service_package" | grep '^Version:' | cut -d ' ' -f 2 | cut -d ':' -f 2 | cut -d '-' -f 1)
@@ -368,65 +366,60 @@ print_services() {
                 fi
             fi
 
-            printf "       \\033[%sm%s\\033[0m   %s%s%s\\n" "$service_color" "$service_icon" "$service_description" "$service_space" "$package_version"
-        done < $SERVICES_FILE | grep -v '#'
+            printf '       \033[%sm%s\033[0m   %-34s%s\n' "$service_color" "$service_icon" "$service_description" "$package_version"
+        done < "$SERVICES_FILE" | grep -v '#'
     fi
 }
 
 print_podman() {
-    printf "\\n"
-    printf "    \\033[1;37mPodman:\\033[0m\\n"
+    printf '\n'
+    printf '    \033[1;37mPodman:\033[0m\n'
 
     podman_version=$(sudo podman version --format json | jq -r '.Client.Version')
-    podman_space=$(generate_space "$podman_version" 23)
     podman_images=$(sudo podman images --format json | jq '. | length')
 
-    printf "       %s   Version %s%s%s  %s Images\\n\\n" "$PODMAN_VERSION_ICON" "$podman_version" "$podman_space" "$PODMAN_IMAGES_ICON" "$podman_images"
+    printf '       %s   Version %-23s%s  %s Images\n\n' "$PODMAN_VERSION_ICON" "$podman_version" "$PODMAN_IMAGES_ICON" "$podman_images"
 
     podman_list=$(sudo podman pod ls --sort name --format json)
     podman_pods=$(echo "$podman_list" | jq -r '.[] .Name')
 
     echo "$podman_pods" | while read -r pod; do
         if [ "$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Status")" = "Running" ]; then
-            pod_space=$(generate_space "$pod" 34)
-
             pod_container_running="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status == \"running\") | .Status" | wc -l)"
 
             if [ "$pod_container_running" -ne 0 ]; then
-                pod_container_running=$(printf "\\033[%um%u Running\\033[0m" "$PODMAN_RUNNING_COLOR" "$pod_container_running")
+                pod_container_running=$(printf '\033[%um%u Running\033[0m' "$PODMAN_RUNNING_COLOR" "$pod_container_running")
             fi
 
             pod_container_other="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status != \"running\") | .Status" | wc -l)"
 
             if [ "$pod_container_other" -ne 0 ]; then
-                pod_container_other=$(printf ",  \\033[%um%u Other\\033[0m" "$PODMAN_OTHER_COLOR" "$pod_container_other")
+                pod_container_other=$(printf ',  \033[%um%u Other\033[0m' "$PODMAN_OTHER_COLOR" "$pod_container_other")
             else
                 pod_container_other=""
             fi
 
             pod_status="$pod_container_running$pod_container_other"
 
-            printf "       \\033[%um%s\\033[0m   %s%s%s\\n" "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_space" "$pod_status"
+            printf '       \033[%um%s\033[0m   %-34s%s\n' "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_status"
         else
-            printf "       \\033[%um%s\\033[0m   \\033[%um%s\\033[0m\\n" "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
+            printf '       \033[%um%s\\033[0m   \033[%um%s\033[0m\n' "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
         fi
     done
 }
 
 print_docker() {
     if [ "$(systemctl is-active docker.service)" = "active" ]; then
-        printf "\\n"
-        printf "    \\033[1;37mDocker:\\033[0m\\n"
+        printf '\n'
+        printf '    \033[1;37mDocker:\033[0m\n'
 
         docker_info=$(sudo curl -sf --unix-socket /var/run/docker.sock http:/v1.40/info)
 
         docker_version=$(echo "$docker_info" | jq -r '.ServerVersion')
 
-        docker_space=$(generate_space "$docker_version" 23)
-
         docker_images=$(echo "$docker_info" | jq -r '.Images')
 
-        printf "       %s   Version %s%s%s  %s Images\\n\\n" "$DOCKER_VERSION_ICON" "$docker_version" "$docker_space" "$DOCKER_IMAGES_ICON" "$docker_images"
+        printf '       %s   Version %-23s%s  %s Images\n\n' "$DOCKER_VERSION_ICON" "$docker_version" "$DOCKER_IMAGES_ICON" "$docker_images"
 
         docker_list=$(sudo curl -sf --unix-socket /var/run/docker.sock "http://v1.40/containers/json?all=true" | jq -c ' .[]')
 
@@ -435,12 +428,10 @@ print_docker() {
 
             container_status="$(echo "$line" | jq -r '.Status' | sed 's/.*/\l&/')"
 
-            container_space=$(generate_space "$container_name" 34)
-
             if [ "$(echo "$line" | jq -r '.State')" = "running" ]; then
-                printf "       \\033[%um%s\\033[0m   %s%s%s\\n" "$DOCKER_RUNNING_COLOR" "$DOCKER_RUNNING_ICON" "$container_name" "$container_space" "$container_status"
+                printf '       \033[%um%s\033[0m   %-34s%s\n' "$DOCKER_RUNNING_COLOR" "$DOCKER_RUNNING_ICON" "$container_name" "$container_status"
             else
-                printf "       \\033[%um%s\\033[0m   \\033[%um%s\\033[0m%s\\033[%um%s\\033[0m\\n" "$DOCKER_OTHER_COLOR" "$DOCKER_OTHER_ICON" "$DOCKER_OTHER_COLOR" "$container_name" "$container_space" "$DOCKER_OTHER_COLOR" "$container_status"
+                printf '       \033[%um%s\033[0m   \033[%um\033[0m%s\033[%um %s\033[0m \n' "$DOCKER_OTHER_COLOR" "$DOCKER_OTHER_ICON" "$DOCKER_OTHER_COLOR" "$container_name" "$DOCKER_OTHER_COLOR" "$container_status"
             fi
         done
     fi

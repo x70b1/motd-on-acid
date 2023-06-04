@@ -215,8 +215,8 @@ print_banner() {
 }
 
 print_cpu() {
-    printf "\\n"
-    printf "    \\033[1;37mCPU:\\033[0m\\n"
+    printf '\n'
+    printf '    \033[1;37mCPU:\033[0m\n'
 
     cpu_loadavg="$(cut -d " " -f 1,2,3 < /proc/loadavg)"
     if [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$CPU_LOADAVG_CRITICAL_THRESHOLD" ]; then
@@ -269,8 +269,8 @@ print_cpu() {
         cpu_count=""
     fi
 
-    printf "       %s   \\033[%dm%s\\033[0m\\n" "$CPU_LOADAVG_ICON" "$cpu_loadavg_color" "$cpu_loadavg"
-    printf "       %s   %s%s  =  %s Cores%s\\n" "$CPU_MODEL_ICON" "$cpu_count" "$cpu_model" "$cpu_cores" "$cpu_threads"
+    printf '       %s   \033[%dm%s\033[0m\n' "$CPU_LOADAVG_ICON" "$cpu_loadavg_color" "$cpu_loadavg"
+    printf '       %s   %s%s  =  %s Cores%s\n' "$CPU_MODEL_ICON" "$cpu_count" "$cpu_model" "$cpu_cores" "$cpu_threads"
 }
 
 print_memory() {

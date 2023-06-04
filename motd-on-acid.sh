@@ -186,7 +186,7 @@ generate_bar_disk() {
 }
 
 print_banner() {
-    printf "\\n%s\\n" "$(figlet -t -f "$BANNER_FONTPATH" " $BANNER_TEXT")"
+    printf '\n%s\n' "$(figlet -t -f "$BANNER_FONTPATH" " $BANNER_TEXT")"
 
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -208,11 +208,9 @@ print_banner() {
             banner_distro_version="?"
         fi
 
-        banner_distro_space=$(generate_space "$banner_distro_name" 13)
-
-        printf "       \\033[%sm%s   %s\\033[0m%s%s\\n" "$banner_distro_color" "$banner_distro_icon" "$banner_distro_name" "$banner_distro_space" "$banner_distro_version"
-        printf "       \\033[%sm%s   Linux\\033[0m         %s\\n\\n" "$BANNER_KERNEL_COLOR" "$BANNER_KERNEL_ICON" "$(cut -d ' ' -f 3 < /proc/version)"
-        printf "       \\033[%sm%s   Uptime\\033[0m        %s\\n" "$BANNER_UPTIME_COLOR" "$BANNER_UPTIME_ICON" "$(uptime -p | cut -d ' ' -f 2-)"
+        printf '       \033[%sm%s   %-20s\033[0m%s\n' "$banner_distro_color" "$banner_distro_icon" "$banner_distro_name" "$banner_distro_version"
+        printf '       \033[%sm%s   Kernel\033[0m              %s\n\n' "$BANNER_KERNEL_COLOR" "$BANNER_KERNEL_ICON" "$(cut -d ' ' -f 3 < /proc/version)"
+        printf '       \033[%sm%s   Uptime\033[0m              %s\n' "$BANNER_UPTIME_COLOR" "$BANNER_UPTIME_ICON" "$(uptime -p | cut -d ' ' -f 2- | cut -d ',' -f 1,2)"
     fi
 }
 

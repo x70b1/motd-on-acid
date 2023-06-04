@@ -403,7 +403,7 @@ print_podman() {
 
             printf '       \033[%um%s\033[0m   %-34s%s\n' "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_status"
         else
-            printf '       \033[%um%s\\033[0m   \033[%um%s\033[0m\n' "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
+            printf '       \033[%um%s\033[0m   \033[%um%s\033[0m\n' "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
         fi
     done
 }
@@ -431,7 +431,7 @@ print_docker() {
             if [ "$(echo "$line" | jq -r '.State')" = "running" ]; then
                 printf '       \033[%um%s\033[0m   %-34s%s\n' "$DOCKER_RUNNING_COLOR" "$DOCKER_RUNNING_ICON" "$container_name" "$container_status"
             else
-                printf '       \033[%um%s\033[0m   \033[%um\033[0m%s\033[%um %s\033[0m \n' "$DOCKER_OTHER_COLOR" "$DOCKER_OTHER_ICON" "$DOCKER_OTHER_COLOR" "$container_name" "$DOCKER_OTHER_COLOR" "$container_status"
+                printf '       \033[%um%s\033[0m   \033[%um%-33s\033[0m\033[%um %s\033[0m \n' "$DOCKER_OTHER_COLOR" "$DOCKER_OTHER_ICON" "$DOCKER_OTHER_COLOR" "$container_name" "$DOCKER_OTHER_COLOR" "$container_status"
             fi
         done
     fi

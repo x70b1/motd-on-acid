@@ -19,13 +19,13 @@ BANNER_FEDORA_COLOR="34"
 BANNER_FONTPATH=""
 BANNER_TEXT="$(hostname -s)"
 
-PROCESSOR_LOADAVG_ICON="#"
-PROCESSOR_LOADAVG_HEALTHY_COLOR="32"
-PROCESSOR_LOADAVG_WARNING_THRESHOLD=2
-PROCESSOR_LOADAVG_WARNING_COLOR="33"
-PROCESSOR_LOADAVG_CRITICAL_THRESHOLD=4
-PROCESSOR_LOADAVG_CRITICAL_COLOR="31"
-PROCESSOR_MODEL_ICON="#"
+CPU_LOADAVG_ICON="#"
+CPU_LOADAVG_HEALTHY_COLOR="32"
+CPU_LOADAVG_WARNING_THRESHOLD=2
+CPU_LOADAVG_WARNING_COLOR="33"
+CPU_LOADAVG_CRITICAL_THRESHOLD=4
+CPU_LOADAVG_CRITICAL_COLOR="31"
+CPU_MODEL_ICON="#"
 
 MEMORY_ICON="#"
 
@@ -242,53 +242,53 @@ print_processor() {
     elif [ "$(echo "$processor_loadavg" | cut -d "." -f 1)" -ge "$PROCESSOR_LOADAVG_WARNING_THRESHOLD" ]; then
         processor_loadavg_color=$PROCESSOR_LOADAVG_WARNING_COLOR
     else
-        processor_loadavg_color=$PROCESSOR_LOADAVG_HEALTHY_COLOR
+        cpu_loadavg_color=$CPU_LOADAVG_HEALTHY_COLOR
     fi
 
-    processor_info=$(cat /proc/cpuinfo)
+    cpu_info=$(cat /proc/cpuinfo)
 
-    processor_arch=$(uname -m)
+    cpu_arch=$(uname -m)
 
-    if [ "$processor_arch" = "x86_64" ]; then
-        processor_model="$(echo "$processor_info" | grep "model name" | sort -u | cut -d ':' -f 2)"
-        processor_count=$(echo "$processor_info" | grep "physical id" | sort -u | wc -l)
-        processor_cores=$(echo "$processor_info" | grep "cpu cores" | sort -u | cut -d ':' -f 2)
-        processor_threads=$(( $(echo "$processor_info" | grep "siblings" | tail -n 1 | cut -d ':' -f 2) ))
+    if [ "$cpu_arch" = "x86_64" ]; then
+        cpu_model="$(echo "$cpu_info" | grep "model name" | sort -u | cut -d ':' -f 2)"
+        cpu_count=$(echo "$cpu_info" | grep "physical id" | sort -u | wc -l)
+        cpu_cores=$(echo "$cpu_info" | grep "cpu cores" | sort -u | cut -d ':' -f 2)
+        cpu_threads=$(( $(echo "$cpu_info" | grep "siblings" | tail -n 1 | cut -d ':' -f 2) ))
 
-        if [ ! "$processor_cores" -eq $processor_threads ]; then
-            processor_threads=", $processor_threads Threads"
+        if [ ! "$cpu_cores" -eq $cpu_threads ]; then
+            cpu_threads=", $cpu_threads Threads"
         else
-            processor_threads=""
+            cpu_threads=""
         fi
-    elif [ "$processor_arch" = "mips64" ]; then
-        processor_model="$(echo "$processor_info" | grep "cpu model" | sort -u | cut -d ':' -f 2)"
-        processor_count=$(echo "$processor_info" | grep "package" | sort -u | wc -l)
-        processor_cores=$(echo "$processor_info" | grep -c processor)
-        processor_threads=""
+    elif [ "$cpu_arch" = "mips64" ]; then
+        cpu_model="$(echo "$cpu_info" | grep "cpu model" | sort -u | cut -d ':' -f 2)"
+        cpu_count=$(echo "$cpu_info" | grep "package" | sort -u | wc -l)
+        cpu_cores=$(echo "$cpu_info" | grep -c processor)
+        cpu_threads=""
     else
-        processor_model="?"
-        processor_count=0
-        processor_cores=0
-        processor_threads=0
+        cpu_model="?"
+        cpu_count=0
+        cpu_cores=0
+        cpu_threads=0
     fi
 
-    processor_model=$(echo "$processor_model" | sed "s/(R)//g")
-    processor_model=$(echo "$processor_model" | sed "s/(tm)//g")
-    processor_model=$(echo "$processor_model" | sed "s/ @/,/")
-    processor_model=$(echo "$processor_model" | sed "s/ CPU//")
-    processor_model=$(echo "$processor_model" | sed "s/  / /")
-    processor_model=$(echo "$processor_model" | sed "s/^ //g")
+    cpu_model=$(echo "$cpu_model" | sed "s/(R)//g")
+    cpu_model=$(echo "$cpu_model" | sed "s/(tm)//g")
+    cpu_model=$(echo "$cpu_model" | sed "s/ @/,/")
+    cpu_model=$(echo "$cpu_model" | sed "s/ CPU//")
+    cpu_model=$(echo "$cpu_model" | sed "s/  / /")
+    cpu_model=$(echo "$cpu_model" | sed "s/^ //g")
 
-    processor_cores=$(( processor_cores * processor_count ))
+    cpu_cores=$(( cpu_cores * cpu_count ))
 
-    if [ "$processor_count" -gt 1 ]; then
-        processor_count="$processor_count""x "
+    if [ "$cpu_count" -gt 1 ]; then
+        cpu_count="$cpu_count""x "
     else
-        processor_count=""
+        cpu_count=""
     fi
 
-    printf "       %s   \\033[%dm%s\\033[0m\\n" "$PROCESSOR_LOADAVG_ICON" "$processor_loadavg_color" "$processor_loadavg"
-    printf "       %s   %s%s  =  %s Cores%s\\n" "$PROCESSOR_MODEL_ICON" "$processor_count" "$processor_model" "$processor_cores" "$processor_threads"
+    printf "       %s   \\033[%dm%s\\033[0m\\n" "$CPU_LOADAVG_ICON" "$cpu_loadavg_color" "$cpu_loadavg"
+    printf "       %s   %s%s  =  %s Cores%s\\n" "$CPU_MODEL_ICON" "$cpu_count" "$cpu_model" "$cpu_cores" "$cpu_threads"
 }
 
 print_memory() {

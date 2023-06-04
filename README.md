@@ -108,7 +108,7 @@ Disable or remove all `pam_motd.so` PAM includes in `/etc/pam.d/sshd`
 Prints a `figlet` banner, linux distribution, kernel version and uptime.
 
 
-### --processor
+### --cpu
 
 Prints the loadavg threshold and hardware info.
 

@@ -274,8 +274,8 @@ print_cpu() {
 }
 
 print_memory() {
-    printf "\\n"
-    printf "    \\033[1;37mMemory:\\033[0m\\n"
+    printf '\n'
+    printf '    \033[1;37mMemory:\033[0m\n'
 
     memory_usage=$(LANG=C free --mega | grep "Mem:")
     memory_total=$(echo "$memory_usage" | awk '{ print $2 }')

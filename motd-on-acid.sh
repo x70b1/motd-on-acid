@@ -258,6 +258,7 @@ print_cpu() {
     cpu_model=$(echo "$cpu_model" | sed "s/(tm)//g")
     cpu_model=$(echo "$cpu_model" | sed "s/ @/,/")
     cpu_model=$(echo "$cpu_model" | sed "s/ CPU//")
+    cpu_model=$(echo "$cpu_model" | sed "s/ Processor//")
     cpu_model=$(echo "$cpu_model" | sed "s/  / /")
     cpu_model=$(echo "$cpu_model" | sed "s/^ //g")
 

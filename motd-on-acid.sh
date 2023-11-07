@@ -32,6 +32,7 @@ MEMORY_ICON="#"
 SWAP_ICON="#"
 
 DISKSPACE_ICON="#"
+DISKSPACE_FILTER="select( .mountpoint != null and .mountpoint != \"[SWAP]\" )"
 
 SERVICES_UP_ICON="#"
 SERVICES_UP_COLOR="32"
@@ -304,7 +305,7 @@ print_diskspace() {
     printf '\n'
     printf '    \033[1;37mDiskspace:\033[0m\n'
 
-    diskspace_devices=$(lsblk -Jlo NAME,MOUNTPOINT | jq  -c '.blockdevices | sort_by(.mountpoint) | .[] | select( .mountpoint != null and .mountpoint != "[SWAP]" )')
+    diskspace_devices=$(lsblk -Jlo NAME,MOUNTPOINT | jq  -c '.blockdevices | sort_by(.mountpoint) | .[] | select( '"$DISKSPACE_FILTER"' )')
     diskspace_partitions=$(df -B M | sed -e "s/M//g")
 
     diskspace_index=0

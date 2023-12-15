@@ -280,9 +280,9 @@ print_memory() {
     printf '    \033[1;37mMemory:\033[0m\n'
 
     memory_usage=$(LANG=C free --mega | grep "Mem:")
-    memory_total=$(echo "$memory_usage" | awk '{ print $2 }')
-    memory_used=$(echo "$memory_usage" | awk '{ print $3 }')
-    memory_cached=$(echo "$memory_usage" | awk '{ print $6 }')
+    memory_total=$(echo "$memory_usage" | tr -s '[:space:]' | cut -d ' ' -f 2)
+    memory_used=$(echo "$memory_usage" | tr -s '[:space:]' | cut -d ' ' -f 3)
+    memory_cached=$(echo "$memory_usage" | tr -s '[:space:]' | cut -d ' ' -f 6)
 
     generate_bar_memory "$MEMORY_ICON" "$memory_total" "$memory_used" "$memory_cached"
 }
@@ -290,8 +290,8 @@ print_memory() {
 print_swap() {
     swap_usage=$(LANG=C free --mega | grep "Swap:")
 
-    swap_total=$(echo "$swap_usage" | awk '{ print $2 }')
-    swap_used=$(echo "$swap_usage" | awk '{ print $3 }')
+    swap_total=$(echo "$swap_usage" | tr -s '[:space:]' | cut -d ' ' -f 2)
+    swap_used=$(echo "$swap_usage" | tr -s '[:space:]' | cut -d ' ' -f 3)
 
     if [ "$swap_total" -ne 0 ]; then
         printf '\n'
@@ -313,15 +313,15 @@ print_diskspace() {
         diskspace_disk_name="$(echo "$line" | jq -r '.name')"
         diskspace_disk_mount="$(echo "$line" | jq -r '.mountpoint')"
 
-        diskspace_disk_size="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name " | awk '{ print $2 }')"
-        diskspace_disk_used="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name " | awk '{ print $3 }')"
+        diskspace_disk_size="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name " | tr -s '[:space:]' | cut -d ' ' -f 2)"
+        diskspace_disk_used="$(echo "$diskspace_partitions" | grep "$diskspace_disk_name " | tr -s '[:space:]' | cut -d ' ' -f 3)"
 
         if [ -z "$diskspace_disk_size" ]; then
-            diskspace_disk_size="$(echo "$diskspace_partitions" | grep "$diskspace_disk_mount" | awk '{ print $2 }')"
+            diskspace_disk_size="$(echo "$diskspace_partitions" | grep "$diskspace_disk_mount" | tr -s '[:space:]' | cut -d ' ' -f 2)"
         fi
 
         if [ -z "$diskspace_disk_used" ]; then
-            diskspace_disk_used="$(echo "$diskspace_partitions" | grep "$diskspace_disk_mount" | awk '{ print $3 }')"
+            diskspace_disk_used="$(echo "$diskspace_partitions" | grep "$diskspace_disk_mount" | tr -s '[:space:]' | cut -d ' ' -f 3)"
         fi
 
         if [ "$diskspace_index" -ne 0 ]; then
@@ -522,20 +522,21 @@ print_letsencrypt() {
 }
 
 print_login() {
-    login_last=$(last -n 2 -a -d --time-format iso "$(whoami)" | head -n 2 | tail -n 1)
+    login_whoami=$(whoami)
+    login_last=$(last -n 2 -a -d --time-format iso "$login_whoami" | head -n 2 | tail -n 1)
 
-    if [ "$( echo "$login_last" | awk '{ print $1 }')" = "$(whoami)" ]; then
-        login_ip=$(echo "$login_last" | awk '{ print $7 }')
-        login_login=$(date -d "$(echo "$login_last" | awk '{ print $3 }' | cut -d '+' -f 1 | sed "s/T/ /")" "+%a, %d.%m.%y %H:%M")
+    if echo "$login_last" | grep -q "$login_whoami"; then
+        login_ip=$(echo "$login_last" | tr -s '[:space:]' | cut -d ' ' -f 7)
+        login_login=$(date -d "$(echo "$login_last" | tr -s '[:space:]' | cut -d ' ' -f 3 | cut -d '+' -f 1 | tr 'T' ' ')" "+%a, %d.%m.%y %H:%M")
 
-        if [ "$(echo "$login_last" | awk '{ print $4 }')" = "still" ]; then
+        if echo "$login_last" | grep -q "still logged in"; then
             login_logout="still connected"
         else
-            login_logout=$(date -d "$(echo "$login_last" | awk '{ print $5 }' | cut -d '+' -f 1 | sed "s/T/ /")" "+%a, %d.%m.%y %H:%M")
+            login_logout=$(date -d "$(echo "$login_last" | tr -s '[:space:]' | cut -d ' ' -f 5 | cut -d '+' -f 1 | tr 'T' ' ')" "+%a, %d.%m.%y %H:%M")
         fi
 
         printf '\n'
-        printf '    \033[1;37mLast login for %s:\033[0m\n' "$(echo "$login_last" | awk '{ print $1 }')"
+        printf '    \033[1;37mLast login for %s:\033[0m\n' "$login_whoami"
         printf '       %s   %-25s%s  %s\n' "$LOGIN_LOGIN_ICON" "$login_login" "$LOGIN_LOGOUT_ICON" "$login_logout"
         printf '       %s   %s\n' "$LOGIN_IP_ICON" "$login_ip"
     fi

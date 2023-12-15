@@ -131,17 +131,17 @@ generate_bar() {
         bar_used_color=$BAR_HEALTHY_COLOR
     fi
 
-    printf '       %s   \033[%sm%s\033[0m' "$1" "$bar_used_color" "$(printf "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_used_size))"
+    printf '       %s   \033[%sm%s\033[0m' "$1" "$bar_used_color" "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_used_size))"
 
     if [ -n "$4" ]; then
         bar_noticed_percent=$(( $4 * 100 / $2 ))
         bar_noticed_size=$(( bar_width * bar_noticed_percent / 100 ))
         bar_unused_size=$(( bar_width - bar_used_size - bar_noticed_size ))
 
-        printf '\033[1;36m%s\033[0m' "$(printf "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_noticed_size))"
+        printf '\033[1;36m%s\033[0m' "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_noticed_size))"
     fi
 
-    printf '\033[1;30m%s\033[0m\n' "$(printf "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_unused_size))"
+    printf '\033[1;30m%s\033[0m\n' "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_unused_size))"
 }
 
 generate_bar_memory() {

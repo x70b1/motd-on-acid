@@ -13,7 +13,7 @@ jobs:
         run: /opt/shellcheck-stable/shellcheck --version
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Analysis
         run: /opt/shellcheck-stable/shellcheck motd-on-acid.sh

@@ -71,7 +71,7 @@ if [ -n "$SSH_CONNECTION" ] && [ $SHLVL -eq 1 ] && [[ $- == *i* ]]; then
         BANNER_UPTIME_ICON="Y"
         BANNER_DEBIAN_ICON="Z"
 
-        bash_motd --banner --processor --memory
+        bash_motd --banner --cpu --memory
     fi
 fi
 ```

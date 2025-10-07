@@ -78,12 +78,12 @@ INCLUDE_FILE="ownscript.sh"
 generate_unit_byte() {
     # 1 - value in M
 
+    unit_symbol="M"
+    unit_value=$1
+
     if [ "$1" -ge 1024 ]; then
         unit_symbol="G"
         unit_value=$(echo "$1/1024" | bc -l | LANG=C xargs printf "%.1f\n")
-    else
-        unit_symbol="M"
-        unit_value=$1
     fi
 
     printf '%s%s\n' "$unit_value" "$unit_symbol"
@@ -95,9 +95,10 @@ generate_annotation() {
     # 3 - cached
     # 4 - available
 
-    if [ "$3" = "" ]; then
-        annotation_cached=""
-    else
+    annotation_cached=""
+    annotation_string=
+
+    if [ ! "$3" = "" ]; then
         annotation_cached="$3 cached / "
     fi
 
@@ -121,17 +122,18 @@ generate_bar() {
     bar_width=50
     bar_used_percent=$(( $3 * 100 / $2 ))
     bar_used_size=$(( bar_width * bar_used_percent / 100 ))
+    bar_used_color=$BAR_HEALTHY_COLOR
+    bar_noticed_percent=
+    bar_noticed_size=
     bar_unused_size=$(( bar_width - bar_used_size ))
 
-    if [ $bar_used_percent -ge "$BAR_WARNING_THRESHOLD" ]; then
-        bar_used_color=$BAR_WARNING_COLOR
-    elif [ $bar_used_percent -ge "$BAR_CRITICAL_THRESHOLD" ]; then
+    if [ $bar_used_percent -ge "$BAR_CRITICAL_THRESHOLD" ]; then
         bar_used_color=$BAR_CRITICAL_COLOR
-    else
-        bar_used_color=$BAR_HEALTHY_COLOR
+    elif [ $bar_used_percent -ge "$BAR_WARNING_THRESHOLD" ]; then
+        bar_used_color=$BAR_WARNING_COLOR
     fi
 
-    printf '       %s   \033[%sm%s\033[0m' "$1" "$bar_used_color" "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_used_size))"
+    printf '       %s   \033[1;%sm%s\033[0m' "$1" "$bar_used_color" "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_used_size))"
 
     if [ -n "$4" ]; then
         bar_noticed_percent=$(( $4 * 100 / $2 ))
@@ -164,7 +166,6 @@ generate_bar_swap() {
     # 3 - used swap in M
 
     bar_swap_used=$(generate_unit_byte "$3")
-
     bar_swap_available=$(( $2 - $3 ))
     bar_swap_available=$(generate_unit_byte "$bar_swap_available")
 
@@ -187,7 +188,13 @@ generate_bar_disk() {
 }
 
 print_banner() {
-    printf '\n%s\n' "$(figlet -t -f "$BANNER_FONTPATH" " $BANNER_TEXT")"
+    banner_figlet="$(figlet -t -f "$BANNER_FONTPATH" " $BANNER_TEXT")"
+    banner_distro_icon="?"
+    banner_distro_color="0"
+    banner_distro_name="Unknown"
+    banner_distro_version="?"
+
+    printf '\n%s\n' "$banner_figlet"
 
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -202,11 +209,6 @@ print_banner() {
             banner_distro_color=$BANNER_FEDORA_COLOR
             banner_distro_name="Fedora"
             banner_distro_version=$VERSION_ID
-        else
-            banner_distro_icon="?"
-            banner_distro_color="0"
-            banner_distro_name="Unknown"
-            banner_distro_version="?"
         fi
 
         printf '       \033[%sm%s   %-20s\033[0m%s\n' "$banner_distro_color" "$banner_distro_icon" "$banner_distro_name" "$banner_distro_version"
@@ -220,17 +222,19 @@ print_cpu() {
     printf '    \033[1;37mCPU:\033[0m\n'
 
     cpu_loadavg="$(cut -d " " -f 1,2,3 < /proc/loadavg)"
+    cpu_loadavg_color=$CPU_LOADAVG_HEALTHY_COLOR
+    cpu_info=$(cat /proc/cpuinfo)
+    cpu_arch=$(uname -m)
+    cpu_model="?"
+    cpu_count=0
+    cpu_cores=0
+    cpu_threads=0
+
     if [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$CPU_LOADAVG_CRITICAL_THRESHOLD" ]; then
         cpu_loadavg_color=$CPU_LOADAVG_CRITICAL_COLOR
     elif [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$CPU_LOADAVG_WARNING_THRESHOLD" ]; then
         cpu_loadavg_color=$CPU_LOADAVG_WARNING_COLOR
-    else
-        cpu_loadavg_color=$CPU_LOADAVG_HEALTHY_COLOR
     fi
-
-    cpu_info=$(cat /proc/cpuinfo)
-
-    cpu_arch=$(uname -m)
 
     if [ "$cpu_arch" = "x86_64" ]; then
         cpu_model="$(echo "$cpu_info" | grep "model name" | sort -u | cut -d ':' -f 2)"
@@ -248,11 +252,6 @@ print_cpu() {
         cpu_count=$(echo "$cpu_info" | grep "package" | sort -u | wc -l)
         cpu_cores=$(echo "$cpu_info" | grep -c processor)
         cpu_threads=""
-    else
-        cpu_model="?"
-        cpu_count=0
-        cpu_cores=0
-        cpu_threads=0
     fi
 
     cpu_model=$(echo "$cpu_model" | sed "s/(R)//g")
@@ -289,7 +288,6 @@ print_memory() {
 
 print_swap() {
     swap_usage=$(LANG=C free --mega | grep "Swap:")
-
     swap_total=$(echo "$swap_usage" | tr -s '[:space:]' | cut -d ' ' -f 2)
     swap_used=$(echo "$swap_usage" | tr -s '[:space:]' | cut -d ' ' -f 3)
 
@@ -307,8 +305,12 @@ print_diskspace() {
 
     diskspace_devices=$(lsblk -Jlo NAME,MOUNTPOINT | jq  -c '.blockdevices | sort_by(.mountpoint) | .[] | '"$DISKSPACE_FILTER")
     diskspace_partitions=$(df -B M | sed -e "s/M//g")
-
     diskspace_index=0
+    diskspace_disk_name=
+    diskspace_disk_mount=
+    diskspace_disk_size=
+    diskspace_disk_used=
+
     echo "$diskspace_devices" | while read -r line; do
         diskspace_disk_name="$(echo "$line" | jq -r '.name')"
         diskspace_disk_mount="$(echo "$line" | jq -r '.mountpoint')"

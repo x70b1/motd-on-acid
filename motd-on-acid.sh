@@ -21,9 +21,9 @@ BANNER_TEXT="$(hostname -s)"
 
 CPU_LOADAVG_ICON="#"
 CPU_LOADAVG_HEALTHY_COLOR="32"
-CPU_LOADAVG_WARNING_THRESHOLD=2
+CPU_LOADAVG_WARNING_FACTOR=2
 CPU_LOADAVG_WARNING_COLOR="33"
-CPU_LOADAVG_CRITICAL_THRESHOLD=4
+CPU_LOADAVG_CRITICAL_FACTOR=4
 CPU_LOADAVG_CRITICAL_COLOR="31"
 CPU_MODEL_ICON="#"
 
@@ -230,12 +230,6 @@ print_cpu() {
     cpu_cores=0
     cpu_threads=0
 
-    if [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$CPU_LOADAVG_CRITICAL_THRESHOLD" ]; then
-        cpu_loadavg_color=$CPU_LOADAVG_CRITICAL_COLOR
-    elif [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$CPU_LOADAVG_WARNING_THRESHOLD" ]; then
-        cpu_loadavg_color=$CPU_LOADAVG_WARNING_COLOR
-    fi
-
     if [ "$cpu_arch" = "x86_64" ]; then
         cpu_model="$(echo "$cpu_info" | grep "model name" | sort -u | cut -d ':' -f 2)"
         cpu_count=$(echo "$cpu_info" | grep "physical id" | sort -u | wc -l)
@@ -268,6 +262,12 @@ print_cpu() {
         cpu_count="$cpu_count""x "
     else
         cpu_count=""
+    fi
+
+    if [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$(( CPU_LOADAVG_CRITICAL_FACTOR * cpu_cores ))" ]; then
+        cpu_loadavg_color=$CPU_LOADAVG_CRITICAL_COLOR
+    elif [ "$(echo "$cpu_loadavg" | cut -d "." -f 1)" -ge "$(( CPU_LOADAVG_WARNING_FACTOR * cpu_cores ))" ]; then
+        cpu_loadavg_color=$CPU_LOADAVG_WARNING_COLOR
     fi
 
     printf '       %s   \033[%dm%s\033[0m\n' "$CPU_LOADAVG_ICON" "$cpu_loadavg_color" "$cpu_loadavg"

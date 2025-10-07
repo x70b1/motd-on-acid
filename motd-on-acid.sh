@@ -343,15 +343,15 @@ print_services() {
 
         service_description=
         service_name=
-        service_package=
+        service_package_name=
+        service_package_version="--"
         service_icon=
         service_color=
-        package_version="--"
 
         while read -r line; do
             service_description=$(echo "$line" | cut -d ';' -f 1)
             service_name=$(echo "$line" | cut -d ';' -f 2)
-            service_package=$(echo "$line" | cut -d ';' -f 3)
+            service_package_name=$(echo "$line" | cut -d ';' -f 3)
 
             if [ -n "$service_description" ] && [ -n "$service_name" ]; then
                 if systemctl is-active --quiet "$service_name".service; then
@@ -362,18 +362,18 @@ print_services() {
                     service_color=$SERVICES_DOWN_COLOR
                 fi
 
-                if [ -n "$service_package" ]; then
+                if [ -n "$service_package_name" ]; then
                     if [ -f /usr/bin/apt ]; then
-                        package_version=$(dpkg -s "$service_package" | grep '^Version:' | cut -d ' ' -f 2 | cut -d ':' -f 2 | cut -d '-' -f 1)
+                        service_package_version=$(dpkg -s "$service_package_name" | grep '^Version:' | cut -d ' ' -f 2 | cut -d ':' -f 2 | cut -d '-' -f 1)
                     elif [ -f /usr/bin/rpm ]; then
-                        package_version=$(rpm -q --queryformat '%{VERSION}' "$service_package")
+                        service_package_version=$(rpm -q --queryformat '%{VERSION}' "$service_package_name")
                     else
-                        package_version="?"
+                        service_package_version="?"
                     fi
                 fi
             fi
 
-            printf '       \033[%sm%s\033[0m   %-34s%s\n' "$service_color" "$service_icon" "$service_description" "$package_version"
+            printf '       \033[%sm%s\033[0m   %-34s%s\n' "$service_color" "$service_icon" "$service_description" "$service_package_version"
         done < "$SERVICES_FILE" | grep -v '#'
     fi
 }

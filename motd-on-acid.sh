@@ -341,11 +341,16 @@ print_services() {
         printf '\n'
         printf '    \033[1;37mServices:\033[0m                              \033[1;37mVersion:\033[0m\n'
 
+        service_description=
+        service_name=
+        service_package=
+        service_icon=
+        service_color=
+        package_version="--"
+
         while read -r line; do
             service_description=$(echo "$line" | cut -d ';' -f 1)
-
             service_name=$(echo "$line" | cut -d ';' -f 2)
-
             service_package=$(echo "$line" | cut -d ';' -f 3)
 
             if [ -n "$service_description" ] && [ -n "$service_name" ]; then
@@ -365,8 +370,6 @@ print_services() {
                     else
                         package_version="?"
                     fi
-                else
-                    package_version="--"
                 fi
             fi
 
@@ -381,11 +384,13 @@ print_podman() {
 
     podman_version=$(sudo podman version --format json | jq -r '.Client.Version')
     podman_images=$(sudo podman images --format json | jq '. | length')
-
-    printf '       %s   Version %-23s%s  %s Images\n\n' "$PODMAN_VERSION_ICON" "$podman_version" "$PODMAN_IMAGES_ICON" "$podman_images"
-
     podman_list=$(sudo podman pod ls --sort name --format json)
     podman_pods=$(echo "$podman_list" | jq -r '.[] .Name')
+    pod_container_running=
+    pod_container_other=
+    pod_status=
+
+    printf '       %s   Version %-23s%s  %s Images\n\n' "$PODMAN_VERSION_ICON" "$podman_version" "$PODMAN_IMAGES_ICON" "$podman_images"
 
     echo "$podman_pods" | while read -r pod; do
         if [ "$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Status")" = "Running" ]; then
@@ -418,14 +423,11 @@ print_docker() {
         printf '    \033[1;37mDocker:\033[0m\n'
 
         docker_info=$(sudo curl -sf --unix-socket /var/run/docker.sock http:/v1.40/info)
-
         docker_version=$(echo "$docker_info" | jq -r '.ServerVersion')
-
         docker_images=$(echo "$docker_info" | jq -r '.Images')
+        docker_list=$(sudo curl -sf --unix-socket /var/run/docker.sock "http://v1.40/containers/json?all=true" | jq -c ' .[]')
 
         printf '       %s   Version %-23s%s  %s Images\n\n' "$DOCKER_VERSION_ICON" "$docker_version" "$DOCKER_IMAGES_ICON" "$docker_images"
-
-        docker_list=$(sudo curl -sf --unix-socket /var/run/docker.sock "http://v1.40/containers/json?all=true" | jq -c ' .[]')
 
         echo "$docker_list" | while read -r line; do
             container_name="$(echo "$line" | jq -r '.Names[]' | sed 's/\///')"
@@ -448,6 +450,9 @@ print_updates() {
 
         updates_count_regular=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
         updates_count_security=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
+        updates_icon=$UPDATES_ZERO_ICON
+        updates_color=$UPDATES_ZERO_COLOR
+        updates_message="Everything is up to date!"
 
         if [ "$updates_count_regular" -ne 0 ]; then
             if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
@@ -459,10 +464,6 @@ print_updates() {
                 updates_color=$UPDATES_AVAILIABLE_COLOR
                 updates_message="$updates_count_regular packages can be updated."
             fi
-        else
-            updates_icon=$UPDATES_ZERO_ICON
-            updates_color=$UPDATES_ZERO_COLOR
-            updates_message="Everything is up to date!"
         fi
 
         printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
@@ -473,6 +474,9 @@ print_updates() {
         updates_count=$(dnf updateinfo -C -q --list)
         updates_count_regular=$(echo "$updates_count" | wc -l)
         updates_count_security=$(echo "$updates_count" | grep -c "Important/Sec")
+        updates_icon=$UPDATES_ZERO_ICON
+        updates_color=$UPDATES_ZERO_COLOR
+        updates_message="Everything is up to date!"
 
         if [ -n "$updates_count_regular" ] && [ "$updates_count_regular" -ne 0 ]; then
             if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
@@ -484,10 +488,6 @@ print_updates() {
                 updates_color=$UPDATES_AVAILIABLE_COLOR
                 updates_message="$updates_count_regular packages can be updated."
             fi
-        else
-            updates_icon=$UPDATES_ZERO_ICON
-            updates_color=$UPDATES_ZERO_COLOR
-            updates_message="Everything is up to date!"
         fi
 
         printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
@@ -500,20 +500,22 @@ print_letsencrypt() {
         printf '    \033[1;37mSSL / let'"’"'s encrypt:\033[0m\n'
 
         cert_list=$(sudo find $LETSENCRYPT_CERTPATH -name cert.pem)
+        cert_name=
+        cert_result=
 
         for cert_file in $cert_list; do
             sudo openssl x509 -checkend $((25 * 86400)) -noout -in "$cert_file" >> /dev/null
-            result=$?
+            cert_result=$?
 
             cert_name=$(echo "$cert_file" | rev | cut -d '/' -f 2 | rev)
 
-            if [ "$result" -eq 0 ]; then
+            if [ "$cert_result" -eq 0 ]; then
                 printf '       \033[%sm%s\033[0m   %s\n' "$LETSENCRYPT_VALID_COLOR" "$LETSENCRYPT_VALID_ICON" "$cert_name"
             else
                 sudo openssl x509 -checkend $((0 * 86400)) -noout -in "$cert_file" >> /dev/null
-                result=$?
+                cert_result=$?
 
-                if [ "$result" -eq 0 ]; then
+                if [ "$cert_result" -eq 0 ]; then
                     printf '       \033[%sm%s\033[0m   %s\n' "$LETSENCRYPT_WARNING_COLOR" "$LETSENCRYPT_WARNING_ICON" "$cert_name"
                 else
                     printf '       \033[%sm%s\033[0m   %s\n' "$LETSENCRYPT_INVALID_COLOR" "$LETSENCRYPT_INVALID_ICON" "$cert_name"

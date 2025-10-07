@@ -8,8 +8,8 @@ BAR_WARNING_COLOR="33"
 BAR_CRITICAL_THRESHOLD=90
 BAR_CRITICAL_COLOR="31"
 
-BANNER_KERNEL_ICON="#"
-BANNER_KERNEL_COLOR="33"
+BANNER_LINUX_ICON="#"
+BANNER_LINUX_COLOR="33"
 BANNER_UPTIME_ICON="#"
 BANNER_UPTIME_COLOR="94"
 BANNER_DEBIAN_ICON="#"
@@ -210,7 +210,7 @@ print_banner() {
         fi
 
         printf '       \033[%sm%s   %-20s\033[0m%s\n' "$banner_distro_color" "$banner_distro_icon" "$banner_distro_name" "$banner_distro_version"
-        printf '       \033[%sm%s   Kernel\033[0m              %s\n\n' "$BANNER_KERNEL_COLOR" "$BANNER_KERNEL_ICON" "$(cut -d ' ' -f 3 < /proc/version)"
+        printf '       \033[%sm%s   Linux\033[0m               %s\n\n' "$BANNER_LINUX_COLOR" "$BANNER_LINUX_ICON" "$(cut -d ' ' -f 3 < /proc/version)"
         printf '       \033[%sm%s   Uptime\033[0m              %s\n' "$BANNER_UPTIME_COLOR" "$BANNER_UPTIME_ICON" "$(uptime -p | cut -d ' ' -f 2- | cut -d ',' -f 1,2)"
     fi
 }

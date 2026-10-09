@@ -471,9 +471,9 @@ print_updates() {
         printf '\n'
         printf '    \033[1;37mUpdates:\033[0m\n'
 
-        updates_count=$(dnf updateinfo -C -q --list)
+        updates_count=$(dnf -C -q updateinfo list)
         updates_count_regular=$(echo "$updates_count" | wc -l)
-        updates_count_security=$(echo "$updates_count" | grep -c "Important/Sec")
+        updates_count_security=$(echo "$updates_count" | grep -c " security ")
         updates_icon=$UPDATES_ZERO_ICON
         updates_color=$UPDATES_ZERO_COLOR
         updates_message="Everything is up to date!"

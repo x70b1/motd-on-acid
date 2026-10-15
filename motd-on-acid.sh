@@ -57,7 +57,7 @@ DOCKER_OTHER_COLOR="90"
 UPDATES_ZERO_ICON="#"
 UPDATES_ZERO_COLOR="32"
 UPDATES_AVAILIABLE_ICON="#"
-UPDATES_AVAILIABLE_COLOR="33"
+UPDATES_AVAILIABLE_COLOR="36"
 UPDATES_SECURITY_ICON="#"
 UPDATES_SECURITY_COLOR="31"
 
@@ -444,54 +444,43 @@ print_docker() {
 }
 
 print_updates() {
-    if [ -f /usr/bin/apt ]; then
-        printf '\n'
-        printf '    \033[1;37mUpdates:\033[0m\n'
+    updates_icon=$UPDATES_ZERO_ICON
+    updates_color=$UPDATES_ZERO_COLOR
+    updates_message="Everything is up to date!"
 
+    if [ -f /usr/bin/apt ]; then
         updates_count_regular=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
         updates_count_security=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
-        updates_icon=$UPDATES_ZERO_ICON
-        updates_color=$UPDATES_ZERO_COLOR
-        updates_message="Everything is up to date!"
-
-        if [ "$updates_count_regular" -ne 0 ]; then
-            if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
-                updates_icon=$UPDATES_SECURITY_ICON
-                updates_color=$UPDATES_SECURITY_COLOR
-                updates_message="$updates_count_regular packages can be updated, $updates_count_security are security updates."
-            else
-                updates_icon=$UPDATES_AVAILIABLE_ICON
-                updates_color=$UPDATES_AVAILIABLE_COLOR
-                updates_message="$updates_count_regular packages can be updated."
-            fi
-        fi
-
-        printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
     elif [ -f /usr/bin/dnf ]; then
-        printf '\n'
-        printf '    \033[1;37mUpdates:\033[0m\n'
-
         updates_count=$(dnf -C -q updateinfo list)
-        updates_count_regular=$(echo "$updates_count" | wc -l)
-        updates_count_security=$(echo "$updates_count" | grep -c " security ")
-        updates_icon=$UPDATES_ZERO_ICON
-        updates_color=$UPDATES_ZERO_COLOR
-        updates_message="Everything is up to date!"
 
-        if [ -n "$updates_count_regular" ] && [ "$updates_count_regular" -ne 0 ]; then
-            if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
-                updates_icon=$UPDATES_SECURITY_ICON
-                updates_color=$UPDATES_SECURITY_COLOR
-                updates_message="$updates_count_regular packages can be updated, $updates_count_security are security updates."
-            else
-                updates_icon=$UPDATES_AVAILIABLE_ICON
-                updates_color=$UPDATES_AVAILIABLE_COLOR
-                updates_message="$updates_count_regular packages can be updated."
-            fi
+        if [ -n "$updates_count" ]; then
+            updates_count_regular=$(echo "$updates_count" | grep -c -v '^Name')
+            updates_count_security=$(echo "$updates_count" | grep -c " security ")
         fi
-
-        printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
     fi
+
+    if [ -n "$updates_count_regular" ] && [ "$updates_count_regular" -ne 0 ]; then
+        if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
+            updates_icon=$UPDATES_SECURITY_ICON
+            updates_color=$UPDATES_SECURITY_COLOR
+
+            if [ "$updates_count_regular" -eq "$updates_count_security" ]; then
+                updates_message="$updates_count_security security updates are availiable."
+            else
+                updates_message="$updates_count_regular packages can be updated, $updates_count_security are security updates."
+            fi
+        else
+            updates_icon=$UPDATES_AVAILIABLE_ICON
+            updates_color=$UPDATES_AVAILIABLE_COLOR
+            updates_message="$updates_count_regular packages can be updated."
+        fi
+    fi
+
+    printf '\n'
+    printf '    \033[1;37mUpdates:\033[0m\n'
+
+    printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
 }
 
 print_letsencrypt() {

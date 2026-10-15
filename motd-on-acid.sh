@@ -374,7 +374,7 @@ print_services() {
             fi
 
             printf '       \033[%sm%s\033[0m   %-34s%s\n' "$service_color" "$service_icon" "$service_description" "$service_package_version"
-        done < "$SERVICES_FILE" | grep -v '#'
+        done < "$SERVICES_FILE"
     fi
 }
 

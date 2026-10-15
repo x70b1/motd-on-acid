@@ -198,7 +198,7 @@ print_cpu() {
         cpu_threads=$(( $(echo "$cpu_info" | grep "siblings" | tail -n 1 | cut -d ':' -f 2) ))
 
         if [ ! "$cpu_cores" -eq $cpu_threads ]; then
-            cpu_threads=", $cpu_threads Threads"
+            cpu_threads="/$cpu_threads Threads"
         else
             cpu_threads=""
         fi
@@ -214,13 +214,14 @@ print_cpu() {
     cpu_model=$(echo "$cpu_model" | sed "s/ @/,/")
     cpu_model=$(echo "$cpu_model" | sed "s/ CPU//")
     cpu_model=$(echo "$cpu_model" | sed "s/ Processor//")
+    cpu_model=$(echo "$cpu_model" | sed "s/ [0-9]*-Core//")
     cpu_model=$(echo "$cpu_model" | sed "s/  / /")
     cpu_model=$(echo "$cpu_model" | sed "s/^ //g")
 
     cpu_cores=$(( cpu_cores * cpu_count ))
 
     if [ "$cpu_count" -gt 1 ]; then
-        cpu_count="$cpu_count""x "
+        cpu_count="$cpu_count""x"
     else
         cpu_count=""
     fi
@@ -232,7 +233,7 @@ print_cpu() {
     fi
 
     printf '       %s   \033[%dm%s\033[0m\n' "$CPU_LOADAVG_ICON" "$cpu_loadavg_color" "$cpu_loadavg"
-    printf '       %s   %s%s  =  %s Cores%s\n' "$CPU_MODEL_ICON" "$cpu_count" "$cpu_model" "$cpu_cores" "$cpu_threads"
+    printf '       %s   %s%s Cores%s, %s\n' "$CPU_MODEL_ICON" "$cpu_count" "$cpu_cores" "$cpu_threads" "$cpu_model"
 }
 
 print_memory() {

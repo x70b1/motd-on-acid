@@ -7,6 +7,8 @@ BAR_WARNING_THRESHOLD=70
 BAR_WARNING_COLOR="33"
 BAR_CRITICAL_THRESHOLD=90
 BAR_CRITICAL_COLOR="31"
+BAR_OTHER_COLOR="90"
+BAR_UNUSED_COLOR="90"
 
 BANNER_LINUX_ICON="#"
 BANNER_LINUX_COLOR="33"
@@ -92,22 +94,22 @@ generate_unit_byte() {
 generate_annotation() {
     # 1 - name
     # 2 - used
-    # 3 - cached
+    # 3 - other
     # 4 - available
 
-    annotation_cached=""
-    annotation_string=
+    annotation_other=""
+    annotation_string=""
 
     if [ ! "$3" = "" ]; then
-        annotation_cached="$3 cached / "
+        annotation_other="$3 / "
     fi
 
     if [ "$1" = "" ]; then
-        annotation_string="$2 used / $annotation_cached$4 available"
+        annotation_string="$2 used / $annotation_other$4 available"
 
         printf '           %49s\n' "$annotation_string"
     else
-        annotation_string="$2 used / $annotation_cached$4 available"
+        annotation_string="$2 used / $annotation_other$4 available"
 
         printf '           %-20s%29s\n' "$1" "$annotation_string"
     fi
@@ -117,14 +119,14 @@ generate_bar() {
     # 1 - icon
     # 2 - total
     # 3 - used
-    # 4 - [ noticed ]
+    # 4 - [ other ]
 
     bar_width=50
     bar_used_percent=$(( $3 * 100 / $2 ))
     bar_used_size=$(( bar_width * bar_used_percent / 100 ))
     bar_used_color=$BAR_HEALTHY_COLOR
-    bar_noticed_percent=
-    bar_noticed_size=
+    bar_other_percent=
+    bar_other_size=
     bar_unused_size=$(( bar_width - bar_used_size ))
 
     if [ $bar_used_percent -ge "$BAR_CRITICAL_THRESHOLD" ]; then
@@ -136,55 +138,14 @@ generate_bar() {
     printf '       %s   \033[1;%sm%s\033[0m' "$1" "$bar_used_color" "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_used_size))"
 
     if [ -n "$4" ]; then
-        bar_noticed_percent=$(( $4 * 100 / $2 ))
-        bar_noticed_size=$(( bar_width * bar_noticed_percent / 100 ))
-        bar_unused_size=$(( bar_width - bar_used_size - bar_noticed_size ))
+        bar_other_percent=$(( $4 * 100 / $2 ))
+        bar_other_size=$(( bar_width * bar_other_percent / 100 ))
+        bar_unused_size=$(( bar_width - bar_used_size - bar_other_size ))
 
-        printf '\033[1;36m%s\033[0m' "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_noticed_size))"
+        printf '\033[1;36m%s\033[0m' "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_other_size))"
     fi
 
-    printf '\033[1;30m%s\033[0m\n' "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_unused_size))"
-}
-
-generate_bar_memory() {
-    # 1 - icon
-    # 2 - total memory in M
-    # 3 - used memory in M
-    # 4 - cached memory in M
-
-    bar_memory_used=$(generate_unit_byte "$3")
-    bar_memory_cached=$(generate_unit_byte "$4")
-    bar_memory_available=$(generate_unit_byte  $(( $2 - $3 )) )
-
-    generate_annotation "" "$bar_memory_used" "$bar_memory_cached" "$bar_memory_available"
-    generate_bar "$1" "$2" "$3" "$4"
-}
-
-generate_bar_swap() {
-    # 1 - icon
-    # 2 - total swap in M
-    # 3 - used swap in M
-
-    bar_swap_used=$(generate_unit_byte "$3")
-    bar_swap_available=$(( $2 - $3 ))
-    bar_swap_available=$(generate_unit_byte "$bar_swap_available")
-
-    generate_annotation "" "$bar_swap_used" "" "$bar_swap_available"
-    generate_bar "$1" "$2" "$3"
-}
-
-generate_bar_disk() {
-    # 1 - icon
-    # 2 - total size in M
-    # 3 - used space in M
-    # 4 - mount path
-
-    bar_disk_used=$(generate_unit_byte "$3")
-    bar_disk_available=
-    bar_disk_available="$(generate_unit_byte $(( $2 - $3)))"
-
-    generate_annotation "$4" "$bar_disk_used" "" "$bar_disk_available"
-    generate_bar "$1" "$2" "$3"
+    printf '\033[0;%sm%s\033[0m\n' "$BAR_OTHER_COLOR" "$(printf -- "$BAR_ELEMENT"'%.0s' $(seq 1 $bar_unused_size))"
 }
 
 print_banner() {
@@ -283,7 +244,8 @@ print_memory() {
     memory_used=$(echo "$memory_usage" | tr -s '[:space:]' | cut -d ' ' -f 3)
     memory_cached=$(echo "$memory_usage" | tr -s '[:space:]' | cut -d ' ' -f 6)
 
-    generate_bar_memory "$MEMORY_ICON" "$memory_total" "$memory_used" "$memory_cached"
+    generate_annotation "" "$(generate_unit_byte "$memory_used")" "$(generate_unit_byte $memory_cached) cached" "$(generate_unit_byte $(($memory_total - $memory_used)))"
+    generate_bar "$MEMORY_ICON" "$memory_total" "$memory_used" "$memory_cached"
 }
 
 print_swap() {
@@ -295,7 +257,8 @@ print_swap() {
         printf '\n'
         printf '    \033[1;37mSwap:\033[0m\n'
 
-        generate_bar_swap "$SWAP_ICON" "$swap_total" "$swap_used"
+        generate_annotation "" "$(generate_unit_byte "$swap_used")" "" "$(generate_unit_byte $(($swap_total - $swap_used)))"
+        generate_bar "$SWAP_ICON" "$swap_total" "$swap_used"
     fi
 }
 
@@ -332,7 +295,8 @@ print_diskspace() {
 
         diskspace_index=$(( diskspace_index + 1 ))
 
-        generate_bar_disk "$DISKSPACE_ICON" "$diskspace_disk_size" "$diskspace_disk_used" "$diskspace_disk_mount"
+        generate_annotation "$diskspace_disk_mount" "$(generate_unit_byte "$diskspace_disk_used")" "" "$(generate_unit_byte $(($diskspace_disk_size - $diskspace_disk_used)))"
+        generate_bar "$DISKSPACE_ICON" "$diskspace_disk_size" "$diskspace_disk_used"
     done
 }
 

@@ -417,12 +417,8 @@ print_updates() {
         updates_count_regular=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
         updates_count_security=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
     elif [ -f /usr/bin/dnf ]; then
-        updates_count=$(dnf -C -q updateinfo list)
-
-        if [ -n "$updates_count" ]; then
-            updates_count_regular=$(echo "$updates_count" | grep -c -v '^Name')
-            updates_count_security=$(echo "$updates_count" | grep -c " security ")
-        fi
+        updates_count_regular=$(dnf -C -q updateinfo list --cacheonly --updates | grep -v -c '^Name')
+        updates_count_security=$(echo "$updates_count_regular" | grep -c " security ")
     fi
 
     if [ -n "$updates_count_regular" ] && [ "$updates_count_regular" -ne 0 ]; then

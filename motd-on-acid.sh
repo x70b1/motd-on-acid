@@ -154,6 +154,7 @@ print_banner() {
     banner_distro_color="0"
     banner_distro_name="Unknown"
     banner_distro_version="?"
+    banner_linux_version="$(uname -r | grep -oP '^\d+\.\d+\.\d+')"
 
     printf '\n%s\n' "$banner_figlet"
 
@@ -172,9 +173,9 @@ print_banner() {
             banner_distro_version=$VERSION_ID
         fi
 
-        printf '       \033[%sm%s   %-20s\033[0m%s\n' "$banner_distro_color" "$banner_distro_icon" "$banner_distro_name" "$banner_distro_version"
-        printf '       \033[%sm%s   Linux\033[0m               %s\n\n' "$BANNER_LINUX_COLOR" "$BANNER_LINUX_ICON" "$(cut -d ' ' -f 3 < /proc/version)"
-        printf '       \033[%sm%s   Uptime\033[0m              %s\n' "$BANNER_UPTIME_COLOR" "$BANNER_UPTIME_ICON" "$(uptime -p | cut -d ' ' -f 2- | cut -d ',' -f 1,2)"
+        printf '       \033[%sm%s   %-14s\033[0m%s\n' "$banner_distro_color" "$banner_distro_icon" "$banner_distro_name" "$banner_distro_version"
+        printf '       \033[%sm%s   Linux\033[0m         %s\n\n' "$BANNER_LINUX_COLOR" "$BANNER_LINUX_ICON" "$banner_linux_version"
+        printf '       \033[%sm%s   Uptime\033[0m        %s\n' "$BANNER_UPTIME_COLOR" "$BANNER_UPTIME_ICON" "$(uptime -p | cut -d ' ' -f 2- | cut -d ',' -f 1,2)"
     fi
 }
 

@@ -107,11 +107,11 @@ generate_annotation() {
     if [ "$1" = "" ]; then
         annotation_string="$2 used / $annotation_other$4 available"
 
-        printf '           %49s\n' "$annotation_string"
+        printf '           %56s\n' "$annotation_string"
     else
         annotation_string="$2 used / $annotation_other$4 available"
 
-        printf '           %-20s%29s\n' "$1" "$annotation_string"
+        printf '           %-20s%36s\n' "$1" "$annotation_string"
     fi
 }
 
@@ -121,7 +121,7 @@ generate_bar() {
     # 3 - used
     # 4 - [ other ]
 
-    bar_width=50
+    bar_width=56
     bar_used_percent=$(( $3 * 100 / $2 ))
     bar_used_size=$(( bar_width * bar_used_percent / 100 ))
     bar_used_color=$BAR_HEALTHY_COLOR
@@ -304,7 +304,7 @@ print_diskspace() {
 print_services() {
     if [ -f "$SERVICES_FILE" ] && [ "$(wc -l < "$SERVICES_FILE" )" != 0 ]; then
         printf '\n'
-        printf '    \033[1;37mServices:\033[0m                              \033[1;37mVersion:\033[0m\n'
+        printf '    \033[1;37mServices:\033[0m                                \033[1;37mVersion:\033[0m\n'
 
         service_description=
         service_name=
@@ -338,7 +338,7 @@ print_services() {
                 fi
             fi
 
-            printf '       \033[%sm%s\033[0m   %-34s%s\n' "$service_color" "$service_icon" "$service_description" "$service_package_version"
+            printf '       \033[%sm%s\033[0m   %-36s%s\n' "$service_color" "$service_icon" "$service_description" "$service_package_version"
         done < "$SERVICES_FILE"
     fi
 }
@@ -355,7 +355,7 @@ print_podman() {
     pod_container_other=
     pod_status=
 
-    printf '       %s   Version %-23s%s  %s Images\n\n' "$PODMAN_VERSION_ICON" "$podman_version" "$PODMAN_IMAGES_ICON" "$podman_images"
+    printf '       %s   Version %-25s%s  %s Images\n\n' "$PODMAN_VERSION_ICON" "$podman_version" "$PODMAN_IMAGES_ICON" "$podman_images"
 
     echo "$podman_pods" | while read -r pod; do
         if [ "$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Status")" = "Running" ]; then
@@ -375,7 +375,7 @@ print_podman() {
 
             pod_status="$pod_container_running$pod_container_other"
 
-            printf '       \033[%um%s\033[0m   %-34s%s\n' "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_status"
+            printf '       \033[%um%s\033[0m   %-36s%s\n' "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_status"
         else
             printf '       \033[%um%s\033[0m   \033[%um%s\033[0m\n' "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
         fi
@@ -392,7 +392,7 @@ print_docker() {
         docker_images=$(echo "$docker_info" | jq -r '.Images')
         docker_list=$(sudo curl -sf --unix-socket /var/run/docker.sock "http://v1.40/containers/json?all=true" | jq -c ' .[]')
 
-        printf '       %s   Version %-23s%s  %s Images\n\n' "$DOCKER_VERSION_ICON" "$docker_version" "$DOCKER_IMAGES_ICON" "$docker_images"
+        printf '       %s   Version %-25s%s  %s Images\n\n' "$DOCKER_VERSION_ICON" "$docker_version" "$DOCKER_IMAGES_ICON" "$docker_images"
 
         echo "$docker_list" | while read -r line; do
             container_name="$(echo "$line" | jq -r '.Names[]' | sed 's/\///')"
@@ -402,7 +402,7 @@ print_docker() {
             if [ "$(echo "$line" | jq -r '.State')" = "running" ]; then
                 printf '       \033[%um%s\033[0m   %-34s%s\n' "$DOCKER_RUNNING_COLOR" "$DOCKER_RUNNING_ICON" "$container_name" "$container_status"
             else
-                printf '       \033[%um%s\033[0m   \033[%um%-33s\033[0m\033[%um %s\033[0m \n' "$DOCKER_OTHER_COLOR" "$DOCKER_OTHER_ICON" "$DOCKER_OTHER_COLOR" "$container_name" "$DOCKER_OTHER_COLOR" "$container_status"
+                printf '       \033[%um%s\033[0m   \033[%um%-35s\033[0m\033[%um %s\033[0m \n' "$DOCKER_OTHER_COLOR" "$DOCKER_OTHER_ICON" "$DOCKER_OTHER_COLOR" "$container_name" "$DOCKER_OTHER_COLOR" "$container_status"
             fi
         done
     fi
@@ -495,7 +495,7 @@ print_login() {
 
         printf '\n'
         printf '    \033[1;37mLast login for %s:\033[0m\n' "$login_whoami"
-        printf '       %s   %-25s%s  %s\n' "$LOGIN_LOGIN_ICON" "$login_login" "$LOGIN_LOGOUT_ICON" "$login_logout"
+        printf '       %s   %s               %s  %s\n' "$LOGIN_LOGIN_ICON" "$login_login" "$LOGIN_LOGOUT_ICON" "$login_logout"
         printf '       %s   %s\n' "$LOGIN_IP_ICON" "$login_ip"
     fi
 }

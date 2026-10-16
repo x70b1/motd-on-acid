@@ -232,8 +232,8 @@ print_cpu() {
         cpu_loadavg_color=$CPU_LOADAVG_WARNING_COLOR
     fi
 
-    printf '       %s   \033[%dm%s\033[0m\n' "$CPU_LOADAVG_ICON" "$cpu_loadavg_color" "$cpu_loadavg"
     printf '       %s   %s%s Cores%s, %s\n' "$CPU_MODEL_ICON" "$cpu_count" "$cpu_cores" "$cpu_threads" "$cpu_model"
+    printf '       %s   \033[%dm%s\033[0m\n' "$CPU_LOADAVG_ICON" "$cpu_loadavg_color" "$cpu_loadavg"
 }
 
 print_memory() {

@@ -415,10 +415,10 @@ print_updates() {
     updates_message="Everything is up to date!"
 
     if [ -f /usr/bin/apt ]; then
-        updates_count_regular=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
-        updates_count_security=$(apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
+        updates_count_regular=$(sudo apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
+        updates_count_security=$(sudo apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
     elif [ -f /usr/bin/dnf ]; then
-        updates_count_regular=$(dnf -C -q updateinfo list --cacheonly --updates | grep -v -c '^Name')
+        updates_count_regular=$(sudo dnf -C -q updateinfo list --cacheonly --updates | grep -v -c '^Name')
         updates_count_security=$(echo "$updates_count_regular" | grep -c " security ")
     fi
 

@@ -174,6 +174,7 @@ username ALL=(ALL) NOPASSWD: /usr/bin/curl -sf --unix-socket /var/run/docker.soc
 
 Prints your available linux distribution updates.
 `apt` and `dnf` is supported at the moment.
+Add `apt-get` or `dnf` to your sudoers file.
 
 
 ### --letsencrypt

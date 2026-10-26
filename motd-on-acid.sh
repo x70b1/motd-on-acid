@@ -329,7 +329,7 @@ print_services() {
                 fi
 
                 if [ -n "$service_package_name" ]; then
-                    if [ -f /usr/bin/apt ]; then
+                    if [ -f /usr/bin/dpkg ]; then
                         service_package_version=$(dpkg -s "$service_package_name" | grep '^Version:' | cut -d ' ' -f 2 | cut -d ':' -f 2 | cut -d '-' -f 1)
                     elif [ -f /usr/bin/rpm ]; then
                         service_package_version=$(rpm -q --queryformat '%{VERSION}' "$service_package_name")

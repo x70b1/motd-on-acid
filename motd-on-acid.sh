@@ -345,42 +345,44 @@ print_services() {
 }
 
 print_podman() {
-    printf '\n'
-    printf '    \033[1;37mPodman:\033[0m\n'
+    if [ -f /usr/bin/podman ]; then
+        printf '\n'
+        printf '    \033[1;37mPodman:\033[0m\n'
 
-    podman_version=$(sudo podman version --format json | jq -r '.Client.Version')
-    podman_images=$(sudo podman images --format json | jq '. | length')
-    podman_list=$(sudo podman pod ls --sort name --format json)
-    podman_pods=$(echo "$podman_list" | jq -r '.[] .Name')
-    pod_container_running=
-    pod_container_other=
-    pod_status=
+        podman_version=$(sudo podman version --format json | jq -r '.Client.Version')
+        podman_images=$(sudo podman images --format json | jq '. | length')
+        podman_list=$(sudo podman pod ls --sort name --format json)
+        podman_pods=$(echo "$podman_list" | jq -r '.[] .Name')
+        pod_container_running=
+        pod_container_other=
+        pod_status=
 
-    printf '       %s   Version %-25s%s  %s Images\n\n' "$PODMAN_VERSION_ICON" "$podman_version" "$PODMAN_IMAGES_ICON" "$podman_images"
+        printf '       %s   Version %-25s%s  %s Images\n\n' "$PODMAN_VERSION_ICON" "$podman_version" "$PODMAN_IMAGES_ICON" "$podman_images"
 
-    echo "$podman_pods" | while read -r pod; do
-        if [ "$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Status")" = "Running" ]; then
-            pod_container_running="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status == \"running\") | .Status" | wc -l)"
+        echo "$podman_pods" | while read -r pod; do
+            if [ "$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Status")" = "Running" ]; then
+                pod_container_running="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status == \"running\") | .Status" | wc -l)"
 
-            if [ "$pod_container_running" -ne 0 ]; then
-                pod_container_running=$(printf '\033[%um%u Running\033[0m' "$PODMAN_RUNNING_COLOR" "$pod_container_running")
-            fi
+                if [ "$pod_container_running" -ne 0 ]; then
+                    pod_container_running=$(printf '\033[%um%u Running\033[0m' "$PODMAN_RUNNING_COLOR" "$pod_container_running")
+                fi
 
-            pod_container_other="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status != \"running\") | .Status" | wc -l)"
+                pod_container_other="$(echo "$podman_list" | jq -r ".[] | select(.Name == \"$pod\") | .Containers[] | select(.Status != \"running\") | .Status" | wc -l)"
 
-            if [ "$pod_container_other" -ne 0 ]; then
-                pod_container_other=$(printf ',  \033[%um%u Other\033[0m' "$PODMAN_OTHER_COLOR" "$pod_container_other")
+                if [ "$pod_container_other" -ne 0 ]; then
+                    pod_container_other=$(printf ',  \033[%um%u Other\033[0m' "$PODMAN_OTHER_COLOR" "$pod_container_other")
+                else
+                    pod_container_other=""
+                fi
+
+                pod_status="$pod_container_running$pod_container_other"
+
+                printf '       \033[%um%s\033[0m   %-36s%s\n' "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_status"
             else
-                pod_container_other=""
+                printf '       \033[%um%s\033[0m   \033[%um%s\033[0m\n' "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
             fi
-
-            pod_status="$pod_container_running$pod_container_other"
-
-            printf '       \033[%um%s\033[0m   %-36s%s\n' "$PODMAN_RUNNING_COLOR" "$PODMAN_RUNNING_ICON" "$pod" "$pod_status"
-        else
-            printf '       \033[%um%s\033[0m   \033[%um%s\033[0m\n' "$PODMAN_OTHER_COLOR" "$PODMAN_OTHER_ICON" "$PODMAN_OTHER_COLOR" "$pod"
-        fi
-    done
+        done
+    fi
 }
 
 print_docker() {

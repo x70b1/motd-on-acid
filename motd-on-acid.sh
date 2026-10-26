@@ -410,10 +410,6 @@ print_docker() {
 }
 
 print_updates() {
-    updates_icon=$UPDATES_ZERO_ICON
-    updates_color=$UPDATES_ZERO_COLOR
-    updates_message="Everything is up to date!"
-
     if [ -f /usr/bin/apt ]; then
         updates_count_regular=$(sudo apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c -v Security)
         updates_count_security=$(sudo apt-get -qq -y --ignore-hold --allow-change-held-packages --allow-unauthenticated -s dist-upgrade | grep ^Inst | grep -c Security)
@@ -422,27 +418,33 @@ print_updates() {
         updates_count_security=$(echo "$updates_count_regular" | grep -c " security ")
     fi
 
-    if [ -n "$updates_count_regular" ] && [ "$updates_count_regular" -ne 0 ]; then
-        if [ -n "$updates_count_security" ] && [ "$updates_count_security" -ne 0 ]; then
-            updates_icon=$UPDATES_SECURITY_ICON
-            updates_color=$UPDATES_SECURITY_COLOR
+    if [ -n "$updates_count_regular" ] && [ -n "$updates_count_security" ]; then
+        if [ "$updates_count_regular" -ne 0 ]; then
+            if [ "$updates_count_security" -ne 0 ]; then
+                updates_icon=$UPDATES_SECURITY_ICON
+                updates_color=$UPDATES_SECURITY_COLOR
 
-            if [ "$updates_count_regular" -eq "$updates_count_security" ]; then
-                updates_message="$updates_count_security security updates are availiable."
+                if [ "$updates_count_regular" -eq "$updates_count_security" ]; then
+                    updates_message="$updates_count_security security updates are availiable."
+                else
+                    updates_message="$updates_count_regular packages can be updated, $updates_count_security are security updates."
+                fi
             else
-                updates_message="$updates_count_regular packages can be updated, $updates_count_security are security updates."
+                updates_icon=$UPDATES_AVAILIABLE_ICON
+                updates_color=$UPDATES_AVAILIABLE_COLOR
+                updates_message="$updates_count_regular packages can be updated."
             fi
         else
-            updates_icon=$UPDATES_AVAILIABLE_ICON
-            updates_color=$UPDATES_AVAILIABLE_COLOR
-            updates_message="$updates_count_regular packages can be updated."
+            updates_icon=$UPDATES_ZERO_ICON
+            updates_color=$UPDATES_ZERO_COLOR
+            updates_message="Everything is up to date!"
         fi
+
+        printf '\n'
+        printf '    \033[1;37mUpdates:\033[0m\n'
+
+        printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
     fi
-
-    printf '\n'
-    printf '    \033[1;37mUpdates:\033[0m\n'
-
-    printf '       \033[%sm%s\033[0m   %s\n' "$updates_color" "$updates_icon" "$updates_message"
 }
 
 print_letsencrypt() {
